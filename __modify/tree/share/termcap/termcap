@@ -1,0 +1,360 @@
+# Copyright (c) 1980, 1985, 1989, 1993
+#	The Regents of the University of California.  All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+# 3. All advertising materials mentioning features or use of this software
+#    must display the following acknowledgement:
+#	This product includes software developed by the University of
+#	California, Berkeley and its contributors.
+# 4. Neither the name of the University nor the names of its contributors
+#    may be used to endorse or promote products derived from this software
+#    without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+#	@(#)termcap.src	8.2 (Berkeley) 11/17/93
+# $FreeBSD: head/share/termcap/termcap 275687M $
+
+#	Termcap source file
+#	John Kunze, Berkeley
+#	Craig Leres, Berkeley
+#
+# Please submit changes via https://bugs.freebsd.org/submit/
+#
+# << EOH - after reordering, above header lines survive and this line dies >>
+#
+# DESCRIPTION:
+# This file describes capabilities of various terminals, as needed by
+# software such as screen editors.  It does not attempt to describe
+# printing terminals very well, nor graphics terminals.  Someday.
+# See termcap(5) in the Unix Programmers Manual for documentation.
+#
+# Conventions: First entry is canonical name for model or mode, last entry
+# is verbose description.  Others are mnemonic synonyms for the terminal.
+#
+# Terminal naming conventions:
+# Terminal names look like <manufacturer> <model> - <modes/options>
+# Certain abbreviations (e.g. c100 for concept100) are also allowed
+# for upward compatibility.  The part to the left of the dash, if a
+# dash is present, describes the particular hardware of the terminal.
+# The part to the right can be used for flags indicating special ROM's,
+# extra memory, particular terminal modes, or user preferences.
+# All names should be in lower case, for consistency in typing.
+#
+# The following are conventionally used flags:
+#	rv	Terminal in reverse video mode (black on white)
+#	2p	Has two pages of memory.  Likewise 4p, 8p, etc.
+#	w	Wide - in 132 column mode.
+#	pp	Has a printer port which is used.
+#	na	No arrow keys - termcap ignores arrow keys which are
+#		actually there on the terminal, so the user can use
+#		the arrow keys locally.
+#
+# To easily test a new terminal description, put it in $HOME/.termcap
+# and programs will look there before looking in /etc/termcap.
+# You can also setenv TERMPATH to a list of full pathnames (separated
+# by spaces or colons) to be searched by tgetent() in the order listed.
+# The TERMCAP environment variable is usually set to the termcap
+# entry itself to avoid reading files when starting up a program.
+#
+# If you absolutely MUST check for a specific terminal (this is discouraged)
+# check for the 2nd entry (the canonical form) since all other codes are
+# subject to change.  We would much rather put in special capabilities
+# to describe your terminal than have you key on the name.
+#
+#  Special manufacturer codes:
+#	A: hardcopy daisy wheel terminals
+#	M: Misc. (with only a few terminals)
+#	q: Homemade
+#	s: special (dialup, etc.)
+#
+# Comments in this file begin with # - they cannot appear in the middle
+# of a termcap entry.  Individual entries are commented out by
+# placing a period between the colon and the capability name.
+#
+# To add a termcap entry under FreeBSD for a new terminal type, insert
+# the entry in the appropriate location in /etc/termcap then issue this
+# command:
+#
+#  cap_mkdb -f /usr/share/misc/termcap /etc/termcap
+#
+# Terminfo source entries can be converted to termcap entries with the
+# tic program that is part of the ncurses distribution, see the ports
+# section.
+#
+#
+#  This file is to be installed with an editor script (reorder)
+#  that moves the most common terminals to the front of the file.
+#
+
+xterm|X11 terminal emulator:\
+	:tc=xterm-new:
+
+xterm1|xterm terminal emulator ignoring the alternate screen buffer:\
+	:ti@:te@:tc=xterm:
+
+xterm-256color|xterm with 256 colors:\
+	:tc=xterm+256color:tc=xterm-new:
+
+xterm-new|modern xterm terminal emulator:\
+	:@7=\EOF:K2=\EOE:\
+	:kD=\E[3~:kI=\E[2~:kN=\E[6~:kP=\E[5~:kd=\EOB:\
+	:kh=\EOH:kl=\EOD:kr=\EOC:ku=\EOA:\
+	:F1=\E[23~:F2=\E[24~:k1=\EOP:k2=\EOQ:k3=\EOR:k4=\EOS:k5=\E[15~:\
+	:k6=\E[17~:k7=\E[18~:k8=\E[19~:k9=\E[20~:k;=\E[21~:\
+	:tc=xterm-basic:
+
+xterm-basic|modern xterm terminal emulator - common:\
+	:am:bs:km:mi:ms:ut:xn:AX:\
+	:Co#8:it#8:kn#12:pa#64:\
+	:AB=\E[4%dm:AF=\E[3%dm:AL=\E[%dL:DC=\E[%dP:DL=\E[%dM:\
+	:DO=\E[%dB:Km=\E[M:LE=\E[%dD:RI=\E[%dC:UP=\E[%dA:\
+	:ae=\E(B:al=\E[L:as=\E(0:bl=^G:bt=\E[Z:cb=\E[1K:cd=\E[J:\
+	:ce=\E[K:cl=\E[H\E[2J:cm=\E[%i%d;%dH:\
+	:cs=\E[%i%d;%dr:ct=\E[3g:dc=\E[P:dl=\E[M:\
+	:do=^J:ei=\E[4l:ho=\E[H:im=\E[4h:\
+	:is=\E[!p\E[?3;4l\E[4l\E>:kb=^H:ke=\E[?1l\E>:kB=\E[Z:\
+	:ks=\E[?1h\E=:le=^H:mb=\E[5m:md=\E[1m:me=\E[0m:mk=\E[8m:\
+	:ml=\El:mm=\E[?1034h:mo=\E[?1034l:mr=\E[7m:mu=\Em:nd=\E[C:\
+	:op=\E[39;49m:r1=\Ec:\
+	:r2=\E[!p\E[?3;4l\E[4l\E>:rc=\E8:sc=\E7:se=\E[27m:sf=^J:\
+	:so=\E[7m:sr=\EM:st=\EH:ta=^I:te=\E[?1049l:ti=\E[?1049h:\
+	:ue=\E[24m:up=\E[A:us=\E[4m:vb=\E[?5h\E[?5l:\
+	:ve=\E[?12l\E[?25h:vi=\E[?25l:vs=\E[?12;25h:
+
+xterm+256color|xterm 256-color feature:\
+	:cc:\
+	:Co#256:pa#32767:\
+	:Sb@:Sf@:
+
+putty|PuTTY terminal emulator:\
+	:pa#64:Co#8:AF=\E[3%dm:AB=\E[4%dm:op=\E[39;49m\E[m:\
+	:@7=\E[4~:kD=\E[3~:kI=\E[2~:kN=\E[6~:kP=\E[5~:kh=\E[1~:\
+	:k6=\E[17~:k7=\E[18~:k8=\E[19~:k9=\E[20~:k;=\E[21~:\
+	:k1=\E[11~:k2=\E[12~:k3=\E[13~:k4=\E[14~:k5=\E[15~:\
+	:F1=\E[23~:F2=\E[24~:ve=\E[?25h:vi=\E[?25l:k0@:\
+	:ic=\E[@:IC=\E[%d@:ec=\E[%dX:al=\E[L:dl=\E[M:dc=\E[P:\
+	:AL=\E[%dL:DL=\E[%dM:DC=\E[%dP:\
+	:NP:do=\E[B:cl=\E[H\E[J:sf=\ED:as=\E(0:ae=\E(B:\
+	:cm=\E[%i%d;%dH:nd=\E[C:up=\E[A:nw=\EE:\
+	:ce=\E[K:cd=\E[J:so=\E[7m:se=\E[m:us=\E[4m:ue=\E[m:\
+	:md=\E[1m:mr=\E[7m:mb=\E[5m:me=\E[m:sr=\EM:\
+	:sc=\E7:rc=\E8:cs=\E[%i%d;%dr:UP=\E[%dA:DO=\E[%dB:RI=\E[%dC:\
+	:LE=\E[%dD:ct=\E[3g:st=\EH:le=^H:bs:am:\
+	:is=\E>\E[?7;8h\E[1;24r\E[24;1H:\
+	:if=/usr/share/tabset/vt100:ho=\E[H:\
+	:ac=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||:\
+	:rs=\E>\E[?1;3;4;5l\E[?7;8h:ks=\E[?1h\E=:ke=\E[?1l\E>:\
+	:ku=\EOA:kd=\EOB:kr=\EOC:kl=\EOD:kb=\177:@8=\EOM:\
+	:K1=\EOq:K2=\EOr:K3=\EOs:K4=\EOp:K5=\EOn:pt:xn:\
+	:ta=^I:ms:bl=^G:cr=^M:eo:it#8:RA=\E[?7l:SA=\E[?7h:
+
+putty-256color|PuTTY 0.58 with xterm 256-colors:\
+	:Ic@:tc=xterm+256color:tc=putty:
+
+screen|VT 100/ANSI X3.64 virtual terminal:\
+	:am:xn:ms:mi:G0:km:\
+	:DO=\E[%dB:LE=\E[%dD:RI=\E[%dC:UP=\E[%dA:bs:bt=\E[Z:\
+	:cb=\E[1K:cd=\E[J:ce=\E[K:cl=\E[H\E[J:cm=\E[%i%d;%dH:ct=\E[3g:\
+	:do=^J:nd=\E[C:pt:rc=\E8:rs=\Ec:sc=\E7:st=\EH:up=\EM:\
+	:le=^H:bl=^G:cr=^M:it#8:ho=\E[H:nw=\EE:ta=^I:is=\E)0:\
+	:us=\E[4m:ue=\E[24m:so=\E[3m:se=\E[23m:\
+	:mb=\E[5m:md=\E[1m:mr=\E[7m:me=\E[m:sr=\EM:al=\E[L:\
+	:AL=\E[%dL:dl=\E[M:DL=\E[%dM:cs=\E[%i%d;%dr:dc=\E[P:\
+	:DC=\E[%dP:im=\E[4h:ei=\E[4l:IC=\E[%d@:\
+	:ks=\E[?1h\E=:ke=\E[?1l\E>:vb=\Eg:\
+	:ku=\EOA:kd=\EOB:kr=\EOC:kl=\EOD:kb=^H:\
+	:k1=\EOP:k2=\EOQ:k3=\EOR:k4=\EOS:k5=\E[15~:k6=\E[17~:\
+	:k7=\E[18~:k8=\E[19~:k9=\E[20~:k;=\E[21~:F1=\E[23~:F2=\E[24~:\
+	:F3=\E[25~:F4=\E[26~:F5=\E[28~:F6=\E[29~:\
+	:F7=\E[31~:F8=\E[32~:F9=\E[33~:FA=\E[34~:\
+	:kh=\E[1~:kI=\E[2~:kD=\E[3~:@7=\E[4~:kP=\E[5~:\
+	:kN=\E[6~:eA=\E(B\E)0:as=^N:ae=^O:ti=\E[?1049h:te=\E[?1049l:\
+	:vi=\E[?25l:ve=\E[34h\E[?25h:vs=\E[34l:\
+	:Co#8:pa#64:AF=\E[3%dm:AB=\E[4%dm:op=\E[39;49m:AX:\
+	:ac=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~..--++,,hhII00:
+
+screen-256color|VT 100/ANSI X3.64 terminal with 256 colors:\
+	:Co#256:pa#32767:\
+	:AB=\E[48;5;%dm:AF=\E[38;5;%dm:tc=screen:
+
+rxvt-unicode|rxvt-unicode terminal (X Window System):\
+	:am:bw:eo:hs:km:mi:ms:xn:xo:\
+	:it#8:lm#0:\
+	:AL=\E[%dL:DC=\E[%dP:DL=\E[%dM:DO=\E[%dB:IC=\E[%d@:\
+	:K1=\EOw:K2=\EOu:K3=\EOy:K4=\EOq:K5=\EOs:LE=\E[%dD:\
+	:RI=\E[%dC:SF=\E[%dS:SR=\E[%dT:UP=\E[%dA:ae=\E(B:al=\E[L:\
+	:as=\E(0:bl=^G:cd=\E[J:ce=\E[K:cl=\E[H\E[2J:\
+	:cm=\E[%i%d;%dH:cr=^M:cs=\E[%i%d;%dr:ct=\E[3g:dc=\E[P:\
+	:dl=\E[M:do=^J:ds=\E]2;\007:ec=\E[%dX:ei=\E[4l:fs=^G:\
+	:ho=\E[H:i1=\E[!p:ic=\E[@:im=\E[4h:\
+	:is=\E[r\E[m\E[2J\E[?7;25h\E[?1;3;4;5;6;9;66;1000;1001;1049l\E[4l:\
+	:k1=\E[11~:k2=\E[12~:k3=\E[13~:k4=\E[14~:k5=\E[15~:\
+	:k6=\E[17~:k7=\E[18~:k8=\E[19~:k9=\E[20~:kD=\E[3~:\
+	:kI=\E[2~:kN=\E[6~:kP=\E[5~:kb=\177:kd=\E[B:ke=\E>:\
+	:kh=\E[7~:@7=\E[8~:kl=\E[D:kr=\E[C:ks=\E=:ku=\E[A:\
+	:le=^H:mb=\E[5m:md=\E[1m:me=\E[m\017:mr=\E[7m:nd=\E[C:\
+	:rc=\E8:sc=\E7:se=\E[27m:sf=^J:so=\E[7m:sr=\EM:st=\EH:ta=^I:\
+	:te=\E[r\E[?1049l:ti=\E[?1049h:ts=\E]2;:ue=\E[24m:\
+	:up=\E[A:us=\E[4m:vb=\E[?5h\E[?5l:ve=\E[?25h:vi=\E[?25l:\
+	:vs=\E[?25h:
+
+network:\
+	:tc=unknown:
+
+dialup:\
+	:tc=unknown:
+
+# See login.c for "su"
+dumb|su|unknown:\
+	:am:co#80:do=^J:
+
+ansi|any ansi terminal with pessimistic assumptions:\
+	:co#80:li#24:cl=50\E[;H\E[2J:bs:am:cm=\E[%i%d;%dH:\
+	:nd=\E[C:up=\E[A:ce=\E[K:ho=\E[H:pt:
+
+cons25w|ansiw|ansi80x25-raw:\
+	:am:bs:NP:ms:pt:AX:eo:bw:ut:km:\
+	:co#80:li#25:pa#64:Co#8:it#8:\
+	:al=\E[L:cd=\E[J:ce=\E[K:cl=\E[H\E[J:cm=\E[%i%d;%dH:\
+	:dc=\E[P:dl=\E[M:do=\E[B:bt=\E[Z:ho=\E[H:ic=\E[@:cb=\E[1K:\
+	:nd=\E[C:rs=\Ec:so=\E[7m:se=\E[27m:up=\E[A:cr=^M:ta=^I:\
+	:AF=\E[3%dm:AB=\E[4%dm:op=\E[39;49m:sc=\E7:rc=\E8:\
+	:k1=\E[M:k2=\E[N:k3=\E[O:k4=\E[P:k5=\E[Q:k6=\E[R:k7=\E[S:k8=\E[T:\
+	:k9=\E[U:k;=\E[V:F1=\E[W:F2=\E[X:K2=\E[E:nw=\E[E:ec=\E[%dX:\
+	:kb=^H:kh=\E[H:ku=\E[A:kd=\E[B:kl=\E[D:kr=\E[C:le=^H:sf=\E[S:sr=\E[T:\
+	:kN=\E[G:kP=\E[I:@7=\E[F:kI=\E[L:kD=\177:kB=\E[Z:\
+	:IC=\E[%d@:DC=\E[%dP:SF=\E[%dS:SR=\E[%dT:AL=\E[%dL:DL=\E[%dM:\
+	:DO=\E[%dB:LE=\E[%dD:RI=\E[%dC:UP=\E[%dA:cv=\E[%i%dd:ch=\E[%i%d`:\
+	:mb=\E[5m:md=\E[1m:mr=\E[7m:me=\E[m:bl=^G:\
+	:ve=\E[=S:vi=\E[=1S:vs=\E[=2S:
+
+cons25|ansis|ansi80x25:\
+	:ac=l\332m\300k\277j\331u\264t\303v\301w\302q\304x\263n\305`^Da\260f\370g\361~\371.^Y-^Xh\261i^U0\333y\363z\362:\
+	:tc=cons25w:
+
+cons25-m|ansis-mono|ansi80x25-mono:\
+	:pa@:Co@:AF@:AB@:AX@:op@:us=\E[4m:ue=\E[24m:tc=cons25:
+
+cons50|ansil|ansi80x50:\
+	:li#50:tc=cons25:
+
+# Syscons console with 132 characters (VESA modes)
+cons25-w|ansi132x25:\
+	:co#132:tc=cons25:
+
+cons50-w|ansil-w|ansi132x50:\
+	:co#132:tc=cons50:
+
+cons25r|cons25u|pc3r|ibmpc3r|cons25-koi8:\
+	:ac=q\200x\201m\204v\211j\205t\206n\212u\207l\202w\210k\203y\230z\231f\234~\225a\220h\2210\215:\
+	:tc=cons25w:
+
+cons25r-m|cons25u-m|pc3r-m|ibmpc3r-mono|cons25-koi8-mono:\
+	:pa@:Co@:AF@:AB@:AX@:op@:us=\E[4m:ue=\E[24m:tc=cons25r:
+
+cons25l1|cons25-iso8859-1:\
+	:ac=f\260g\261}\243+\253,\273i\247:\
+	:tc=cons25w:
+
+cons25l1-m|cons25-iso8859-1-mono:\
+	:pa@:Co@:AF@:AB@:AX@:op@:us=\E[4m:ue=\E[24m:tc=cons25l1:
+
+cons50l1|cons50-iso8859-1:\
+	:li#50:tc=cons25l1:
+
+cons25l1-w|cons25w-iso8859-1:\
+	:co#132:tc=cons25l1:
+
+cons50l1-w|cons50w-iso8859-1:\
+	:co#132:tc=cons50l1:
+
+wsvt25|NetBSD wscons in 25 line DEC VT220 mode:\
+	:Co#8:pa#64:it#8:ut:co#80:li#25:vb@:if@:NC#2:\
+	:k1=\E[11~:k2=\E[12~:k3=\E[13~:k4=\E[14~:k5=\E[15~:k;=\E[21~:\
+	:AB=\E[4%dm:AF=\E[3%dm:op=\E[m:is=\E[!p:ti=\E)0:te=\E)B:\
+	:ac=``aaffggjjkkllmmnnqqttuuvvwwxxyyzz{{}}~~:\
+	:@7=\E[8~:kh=\E[7~:kH=\E[8~:rs=\Ec:\
+	:am:bs:mi:ms:xn:xo:\
+	:AL=\E[%dL:DC=\E[%dP:DL=\E[%dM:DO=\E[%dB:IC=\E[%d@:\
+	:LE=\E[%dD:RI=\E[%dC:UP=\E[%dA:ae=^O:al=\E[L:as=^N:bl=^G:\
+	:cd=\E[J:ce=\E[K:cl=\E[H\E[J:cm=\E[%i%d;%dH:cr=^M:\
+	:cs=\E[%i%d;%dr:ct=\E[3g:dc=\E[P:dl=\E[M:do=^J:ec=\E[%dX:\
+	:ei=\E[4l:ho=\E[H:if=/usr/share/tabset/vt100:im=\E[4h:\
+	:k6=\E[17~:k7=\E[18~:k8=\E[19~:k9=\E[20~:kI=\E[2~:\
+	:kN=\E[6~:kP=\E[5~:kb=^H:kd=\E[B:kh=\E[H:kl=\E[D:kr=\E[C:\
+	:ku=\E[A:le=^H:mb=\E[5m:md=\E[1m:me=\E[m:mr=\E[7m:nd=\E[C:\
+	:nw=\EE:rc=\E8:sc=\E7:se=\E[27m:sf=\ED:so=\E[7m:sr=\EM:\
+	:st=\EH:ta=^I:ue=\E[24m:up=\E[A:us=\E[4m:vb=\E[?5h\E[?5l:\
+	:ve=\E[?25h:vi=\E[?25l:
+
+linux|Linux Console:\
+	:am:eo:mi:ms:xn:xo:co#80:it#8:li#25:\
+	:pa#64:Co#8:AF=\E[3%dm:AB=\E[4%dm:op=\E[39;49m:\
+	:AL=\E[%dL:DC=\E[%dP:DL=\E[%dM:K2=\E[G:\
+	:ae=\E[10m:al=\E[L:as=\E[11m:bl=^G:cd=\E[J:ce=\E[K:\
+	:cl=\E[H\E[J:cm=\E[%i%d;%dH:cr=^M:cs=\E[%i%d;%dr:\
+	:ct=\E[3g:dc=\E[P:dl=\E[M:do=^J:ei=\E[4l:ho=\E[H:\
+	:im=\E[4h:k1=\E[[A:k2=\E[[B:k3=\E[[C:k4=\E[[D:k5=\E[[E:\
+	:k6=\E[17~:k7=\E[18~:k8=\E[19~:k9=\E[20~:kD=\E[3~:\
+	:kI=\E[2~:kN=\E[6~:kP=\E[5~:kb=\177:kd=\E[B:kh=\E[1~:@7=\E[4~:\
+	:kl=\E[D:kr=\E[C:ku=\E[A:le=^H:mb=\E[5m:md=\E[1m:\
+	:me=\E[0;10m:mh=\E[2m:mr=\E[7m:nd=\E[C:nw=^M^J:rc=\E8:\
+	:sc=\E7:se=\E[m:sf=^J:so=\E[7m:sr=\EM:st=\EH:ta=^I:\
+	:ue=\E[24m:up=\E[A:us=\E[4m:vb=200\E[?5h\E[?5l:\
+	:ve=\E[?25h:vi=\E[?25l:\
+	:k;=\E[21~:F1=\E[23~:F2=\E[24~:F3=\E[25~:F4=\E[26~:F5=\E[28~:\
+	:F6=\E[29~:F7=\E[31~:F8=\E[32~:F9=\E[33~:FA=\E[34~:
+
+vt100|dec-vt100|vt100-am|vt100am|dec vt100:\
+	:do=2\E[B:co#80:li#24:cl=50\E[H\E[J:sf=2*\ED:\
+	:le=^H:bs:am:cm=5\E[%i%d;%dH:nd=2\E[C:up=2\E[A:\
+	:ce=3\E[K:cd=50\E[J:so=2\E[7m:se=2\E[m:us=2\E[4m:ue=2\E[m:\
+	:md=2\E[1m:mr=2\E[7m:mb=2\E[5m:me=2\E[m:\
+	:is=\E>\E[?1;3;4;5l\E[?7;8h\E[1;24r\E[24;1H:\
+	:if=/usr/share/tabset/vt100:nw=2\EE:ho=\E[H:\
+	:as=2\E(0:ae=2\E(B:\
+	:ac=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||:\
+	:rs=\E>\E[?1;3;4;5l\E[?7;8h:ks=\E[?1h\E=:ke=\E[?1l\E>:\
+	:ku=\EOA:kd=\EOB:kr=\EOC:kl=\EOD:kb=\177:\
+	:k0=\EOy:k1=\EOP:k2=\EOQ:k3=\EOR:k4=\EOS:k5=\EOt:\
+	:k6=\EOu:k7=\EOv:k8=\EOl:k9=\EOw:k;=\EOx:@8=\EOM:\
+	:K1=\EOq:K2=\EOr:K3=\EOs:K4=\EOp:K5=\EOn:pt:sr=2*\EM:xn:\
+	:sc=2\E7:rc=2\E8:cs=5\E[%i%d;%dr:UP=2\E[%dA:DO=2\E[%dB:RI=2\E[%dC:\
+	:LE=2\E[%dD:ct=2\E[3g:st=2\EH:ta=^I:ms:bl=^G:cr=^M:eo:it#8:\
+	:RA=\E[?7l:SA=\E[?7h:po=\E[5i:pf=\E[4i:
+
+xfce|Xfce Terminal:\
+	:tc=gnome:
+
+xterm-debian|xterm terminal emulator with debian backspace:\
+	:kb=\177:tc=xterm:
+
+gnome|GNOME Terminal:\
+	:kb=\177:tc=xterm:
+
+konsole|KDE console window:\
+	:kb=\177:kH=\E[H:@7=\E[F:\
+	:k1=\E[11~:k2=\E[12~:k3=\E[13~:k4=\E[14~:\
+	:tc=xterm:
+
+#
+# END OF TERMCAP
+# ------------------------

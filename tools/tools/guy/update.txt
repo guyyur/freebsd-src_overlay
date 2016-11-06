@@ -1,0 +1,60 @@
+
+update kernel
+  mount -u -o rw,noatime /
+  mount /usr/src                      # if not already mounted
+  mount /usr/obj                      # if not already mounted
+  cd /usr/src
+  make installkernel
+  cd ~
+  umount /usr/obj                     # if wasn't already mounted
+  umount /usr/src                     # if wasn't already mounted
+  shutdown -r now
+  
+  mount -u -o rw,noatime /
+  chflags -R noschg /boot/kernel.old
+  rm -Rf /boot/kernel.old
+  mount -u -o ro,noatime /
+
+
+update world
+  mount -u -o rw,noatime /
+  mount /usr/src                      # if not already mounted
+  mount /usr/obj                      # if not already mounted
+  shutdown now
+  cd /usr/src
+  make installworld
+  make delete-old
+  mergemaster -Fi
+  install -c -m 444 -o root -g wheel /usr/share/zoneinfo/Asia/Jerusalem /etc/localtime    # if not symlink
+  cd tools/tools/guy
+  make -m ../../../share/mk delete-optional
+  ./unused.sh delete
+  ./fix_rc_scripts.sh
+  cd ../../..
+  cd ~
+  umount /usr/obj                     # if wasn't already mounted
+  umount /usr/src                     # if wasn't already mounted
+  reboot
+  
+  mount -u -o rw,noatime /
+  mount /usr/src                      # if not already mounted
+  mount /usr/obj                      # if not already mounted
+  cd /usr/src
+  make delete-old-libs
+  cd ~
+  umount /usr/obj                     # if wasn't already mounted
+  umount /usr/src                     # if wasn't already mounted
+  mount -u -o ro,noatime /
+
+
+update pmbr + gptboot
+  disk=...
+  gpart bootcode -b /boot/pmbr -f x $disk
+  gpart bootcode -p /boot/gptboot -i 1 -f x $disk
+  gpart commit $disk
+
+
+update EFI boot1
+  mount -u -orw,noatime /boot/ESP
+  install -c /boot/boot1.efi /boot/ESP/EFI/BOOT/BOOTX64.EFI
+  mount -u -oro,noatime /boot/ESP
