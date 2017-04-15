@@ -32,7 +32,7 @@ package_kernels()
   for i in $@; do
     mkdir "${DISTDIR}" || exit 1
     env DISTDIR="${DISTDIR}" make distributekernel KERNCONF="${i}" || exit 1
-    if [ "${TARGET}" = "arm" ]; then
+    if [ "${i}" = "MYODROIDC1" -o "${i}" = "MYODROIDC1-ROUTER" ]; then
       cp /usr/obj/${TARGET}.${TARGET_ARCH}/usr/src/sys/$i/kernel.bin "${DISTDIR}/kernel/boot/kernel/" || exit 1
     fi
     ( cd "${DISTDIR}/kernel" && tar cvJf "${PACKAGEDIR}/kernel-${i}.txz" . ) || exit 1
@@ -55,7 +55,7 @@ package_armv6()
   
   create_packagedir
   package_world
-  package_kernels MYHW MYODROIDC1-ROUTER MYRPIB
+  package_kernels MYHW MYHW-ROUTER MYODROIDC1-ROUTER MYRPIB
 }
 
 

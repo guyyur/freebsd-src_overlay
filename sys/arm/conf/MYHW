@@ -1,9 +1,9 @@
-# based on head/sys/arm/conf/GENERIC 308285
+# based on head/sys/arm/conf/GENERIC 316067
 
 ident		MYHW
 
-cpu		CPU_CORTEXA_MP
-cpu		CPU_CORTEXA8
+cpu		CPU_CORTEXA
+options 	SMP_ON_UP
 machine 	arm armv6
 makeoptions	CONF_CFLAGS="-march=armv7a"
 
@@ -121,21 +121,19 @@ device		musb
 
 # Device mode support and USFS template
 # device		usb_template    	# Control of the gadget
-# device		usfs
 
 # Ethernet
 device		loop
 device		ether
-device		mii
 device		bpf
 
-device		emac			# 10/100 integrated EMAC controller
-device		awg			# 10/100/1000 integrated EMAC controller
-device		cpsw
-
-# USB ethernet support, requires miibus
-device		smcphy
+# Ethernet NICs that use the common MII bus controller code.
+# NOTE: Be sure to keep the 'device miibus' line in order to use these NICs!
 device		miibus
+
+device		awg			# 10/100/1000 integrated EMAC controller
+device		cpsw			# TI Common Platform Ethernet Switch (CPSW)
+device		emac			# 10/100 integrated EMAC controller
 
 # Sound support
 # device		sound
@@ -162,7 +160,7 @@ options 	EFI
 
 # Flattened Device Tree
 options 	FDT			# Configure using FDT/DTB data
-# makeoptions	MODULES_EXTRA="dtb/allwinner"
+# makeoptions	MODULES_EXTRA="dtb/allwinner dtb/am335x"
 
 #
 makeoptions	MODULES_OVERRIDE="am335x_dmtpps dtb/am335x libiconv netgraph rc4 usb/axe usb/ucom usb/uether usb/umass usb/uplcom usb/uslcom"

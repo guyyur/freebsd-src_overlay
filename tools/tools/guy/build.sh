@@ -55,7 +55,7 @@ build_armv6()
   export TARGET=arm TARGET_ARCH=armv6
   
   make ${j_option} ${clean_option} buildworld || exit 1
-  make ${j_option} buildkernel KERNCONF="MYHW MYODROIDC1-ROUTER MYRPIB" || exit 1
+  make ${j_option} buildkernel KERNCONF="MYHW MYHW-ROUTER MYODROIDC1-ROUTER MYRPIB" || exit 1
 }
 
 
