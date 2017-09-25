@@ -1,4 +1,4 @@
-# $FreeBSD: head/etc/rc.d/Makefile 307786M $
+# $FreeBSD: head/etc/rc.d/Makefile 322552M $
 
 .include <src.opts.mk>
 
@@ -88,6 +88,7 @@ FILES=	DAEMON \
 	rpcbind \
 	rtadvd \
 	rtsold \
+	rwho \
 	savecore \
 	securelevel \
 	serial \
@@ -147,14 +148,6 @@ APM+=		apmd
 APMPACKAGE=	apm
 .endif
 
-.if ${MK_ATM} != "no"
-FILESGROUPS+=	ATM
-ATM+=		atm1
-ATM+=		atm2
-ATM+=		atm3
-ATMPACKAGE=	atm
-.endif
-
 .if ${MK_AUTOFS} != "no"
 FILES+=		automount
 FILES+=		automountd
@@ -211,6 +204,9 @@ FILES+=		ipnat
 
 .if ${MK_IPFW} != "no"
 FILES+=		ipfw
+.if ${MK_NETGRAPH} != "no"
+FILES+=		ipfw_netflow
+.endif
 FILES+=		natd
 .endif
 
@@ -283,12 +279,6 @@ FILES+=		ppp
 
 .if ${MK_QUOTAS} != "no"
 FILES+=		quota
-.endif
-
-.if ${MK_RCMDS} != "no"
-FILESGROUPS+=	RCMDS
-RCMDS+=		rwho
-RCMDSPACKAGE=	rcmds
 .endif
 
 .if ${MK_ROUTED} != "no"

@@ -1,4 +1,4 @@
-# based on: head/sys/arm/conf/RPI-B 306619
+# based on: head/sys/arm/conf/RPI-B 320777
 
 ident		MYRPIB
 
@@ -10,7 +10,6 @@ options 	INTRNG
 
 options 	SCHED_4BSD		# 4BSD scheduler
 options 	PLATFORM
-options 	MULTIDELAY
 
 #options 	ROOTDEVNAME=\"ufs:mmcsd0s2\"
 
@@ -71,7 +70,7 @@ options 	FDT			# Configure using FDT/DTB data
 # makeoptions	MODULES_EXTRA="dtb/rpi rpi_ft5406"
 
 #
-makeoptions	MODULES_OVERRIDE="dtb/rpi libiconv mii netgraph rc4 usb/axe usb/ucom usb/uether usb/uftdi usb/umass usb/uplcom usb/uslcom"
+makeoptions	MODULES_OVERRIDE="dtb/rpi libiconv mii netgraph rc4 usb/axe usb/uchcom usb/ucom usb/uether usb/uftdi usb/umass usb/uplcom usb/uslcom"
 
 nooptions 	TCP_HHOOK		# hhook(9) framework for TCP
 nooptions 	IPSEC			# IP (v4/v6) security

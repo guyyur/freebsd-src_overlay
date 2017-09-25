@@ -1,4 +1,4 @@
-# based on head/sys/arm/conf/GENERIC 316067
+# based on head/sys/arm/conf/GENERIC 322478
 
 ident		MYHW
 
@@ -25,8 +25,6 @@ options		SOC_TI_AM335X
 options 	SCHED_ULE		# ULE scheduler
 options 	SMP			# Enable multiple cores
 options 	PLATFORM
-options 	PLATFORM_SMP
-options 	MULTIDELAY
 
 # EXT_RESOURCES pseudo devices
 options 	EXT_RESOURCES
@@ -79,6 +77,8 @@ device		am335x_pmic		# AM335x Power Management IC (TPC65217)
 device		am335x_rtc		# RTC support (power management only)
 #device 	am335x_dmtpps		# Pulse Per Second capture driver
 
+# i2c RTCs
+
 # GPIO
 device		gpio
 device		gpiobacklight
@@ -92,6 +92,7 @@ device		gpioled
 
 # SPI
 device		spibus
+device		spigen
 device		ti_spi
 
 # ADC support
@@ -163,7 +164,7 @@ options 	FDT			# Configure using FDT/DTB data
 # makeoptions	MODULES_EXTRA="dtb/allwinner dtb/am335x"
 
 #
-makeoptions	MODULES_OVERRIDE="am335x_dmtpps dtb/am335x libiconv netgraph rc4 usb/axe usb/ucom usb/uether usb/umass usb/uplcom usb/uslcom"
+makeoptions	MODULES_OVERRIDE="am335x_dmtpps dtb/allwinner dtb/am335x libiconv netgraph rc4 usb/axe usb/uchcom usb/ucom usb/uether usb/umass usb/uplcom usb/uslcom"
 
 nooptions 	TCP_HHOOK		# hhook(9) framework for TCP
 nooptions 	IPSEC			# IP (v4/v6) security

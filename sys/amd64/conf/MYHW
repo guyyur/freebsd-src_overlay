@@ -154,7 +154,7 @@ device		snd_ich			# Intel, NVidia and other ICH AC'97 Audio
 # device		sdhci			# Generic PCI SD Host Controller
 
 #
-makeoptions	MODULES_OVERRIDE="cd9660 cd9660_iconv cpuctl drm/drm drm/sis drm2/drm2 drm2/i915kms drm2/radeonkms drm2/radeonkmsfw dtrace em ext2fs fdescfs fuse geom/geom_nop hwpmc i2c/if_ic i2c/iic i2c/iicbb i2c/iicbus krpc ksyms libiconv libmbpool libmchain mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/ucom usb/uftdi usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
+makeoptions	MODULES_OVERRIDE="cd9660 cd9660_iconv cpuctl drm/drm drm/sis drm2/drm2 drm2/i915kms drm2/radeonkms drm2/radeonkmsfw dtrace em ext2fs fdescfs fuse geom/geom_nop hwpmc i2c/if_ic i2c/iic i2c/iicbb i2c/iicbus imgact_binmisc krpc ksyms libiconv libmbpool libmchain mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
 
 options 	NULLFS			# NULL filesystem
 options 	TMPFS			# TMP filesystem

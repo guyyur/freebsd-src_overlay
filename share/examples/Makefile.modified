@@ -1,4 +1,4 @@
-# $FreeBSD: head/share/examples/Makefile 314652M $
+# $FreeBSD: head/share/examples/Makefile 322515M $
 #
 # Doing a make install builds /usr/share/examples
 
@@ -252,8 +252,6 @@ copies:
 		rm -f ${DESTDIR}${BINDIR}/$i; \
 	fi
 .endfor
-	mtree -deU ${MTREE_FOLLOWS_SYMLINKS} \
-	    -f ${SRCTOP}/etc/mtree/BSD.usr.dist -p ${DESTDIR}/usr
 .for file in ${XFILES}
 	${INSTALL} -T package=${PACKAGE_${file}:Uexamples} -o ${SHAREOWN} -g ${SHAREGRP} -m ${SHAREMODE} \
 		${.CURDIR}/${file} ${DESTDIR}${BINDIR}/${file}
@@ -280,9 +278,8 @@ SUBDIR+=pf
 .endif
 .endif
 
-.if ${MK_TESTS} != "no"
-SUBDIR+=tests
-.endif
+HAS_TESTS=
+SUBDIR.${MK_TESTS}+= tests
 
 SUBDIR_PARALLEL=
 

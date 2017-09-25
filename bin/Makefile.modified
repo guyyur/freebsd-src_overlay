@@ -1,5 +1,5 @@
 #	From: @(#)Makefile	8.1 (Berkeley) 5/31/93
-# $FreeBSD: head/bin/Makefile 288904M $
+# $FreeBSD: head/bin/Makefile 320701M $
 
 .include <src.opts.mk>
 
@@ -46,8 +46,6 @@ SUBDIR.${MK_TCSH}+=	csh
 SUBDIR.${MK_TESTS}+=	tests
 
 .include <bsd.arch.inc.mk>
-
-SUBDIR:=	${SUBDIR:O}
 
 SUBDIR_PARALLEL=
 

@@ -81,8 +81,6 @@ my_list="
   share/man/man5/rc.conf.5
   share/termcap/termcap
   sys/kern/subr_rtc.c
-  sys/net/route.c
-  sys/net/route.h
   sys/net/rtsock.c
   sys/netinet6/in6.c
   sys/netinet6/nd6.c
@@ -108,7 +106,7 @@ case $1 in
     ;;
   compare)
     for i in $my_list; do
-      diff -Nudrp "$i" "$i.modified" | less -c
+      diff -Nudrp "$i.modified" "$i" | less -c
     done
     ;;
   *)

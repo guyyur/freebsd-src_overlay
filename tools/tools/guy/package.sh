@@ -61,9 +61,9 @@ package_armv6()
 
 cd ../../.. || exit 1
 
-DISTDIR="${TMPDIR:-/tmp}/src-dist"
 SVN_REVISION="$(svn info | awk '/^Revision:/ { print $2 }')"
 TIMESTAMP=$(date +%Y%m%d)
+DISTDIR="/usr/wrkdir/src-dist"
 
 if [ -e "${DISTDIR}" ]; then
   rm -Rf "${DISTDIR}" || exit 1

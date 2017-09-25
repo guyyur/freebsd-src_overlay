@@ -99,6 +99,16 @@ handle_file etc/rc.d/route6d
 handle_file usr/sbin/route6d
 handle_file usr/share/man/man8/route6d.8.gz
 
+handle_file usr/bin/ruptime
+handle_file usr/share/man/man1/ruptime.1
+
+handle_file etc/periodic/daily/140.clean-rwho
+handle_file etc/rc.d/rwho
+handle_file usr/bin/rwho
+handle_file usr/sbin/rwhod
+handle_file usr/share/man/man1/rwho.1
+handle_file usr/share/man/man8/rwhod.8
+
 handle_file etc/rc.d/sppp
 handle_file sbin/spppcontrol
 handle_file rescue/spppcontrol
