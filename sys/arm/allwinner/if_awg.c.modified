@@ -439,9 +439,8 @@ awg_setup_txbuf(struct awg_softc *sc, struct mbuf **mp)
 			*mp = NULL;
 			return (ENOBUFS);
 		}
-	} else if (error != 0) {
+	} else if (error != 0)
 		return (error);
-	}
 	if (nsegs == 0) {
 		m_freem(*mp);
 		*mp = NULL;
@@ -462,6 +461,8 @@ awg_setup_txbuf(struct awg_softc *sc, struct mbuf **mp)
 		flags |= (csum_flags << TX_CHECKSUM_CTL_SHIFT);
 	}
 
+	bus_dmamap_sync(sc->tx.buf_tag, map, BUS_DMASYNC_PREWRITE);
+
 	for (i = 0; i < nsegs; i++) {
 		if (i == nsegs - 1)
 			flags |= TX_LAST_DESC;
@@ -476,8 +477,6 @@ awg_setup_txbuf(struct awg_softc *sc, struct mbuf **mp)
 	sc->tx.buf_map[si].map = sc->tx.buf_map[cur].map;
 	sc->tx.buf_map[cur].map = map;
 	sc->tx.buf_map[cur].mbuf = m;
-
-	bus_dmamap_sync(sc->tx.buf_tag, map, BUS_DMASYNC_PREWRITE);
 
 	return (0);
 }
@@ -778,8 +777,10 @@ awg_init(void *softc)
 static void
 awg_stop(struct awg_softc *sc)
 {
+	struct awg_bufmap *bmap;
 	if_t ifp;
 	uint32_t val;
+	int i;
 
 	AWG_ASSERT_LOCKED(sc);
 
@@ -814,6 +815,22 @@ awg_stop(struct awg_softc *sc)
 
 	sc->link = 0;
 
+	/* Release any xmit buffers. */
+	for (i = sc->tx.next; sc->tx.queued > 0; i = TX_NEXT(i)) {
+		bmap = &sc->tx.buf_map[i];
+		if (bmap->mbuf != NULL) {
+			bus_dmamap_sync(sc->tx.buf_tag, bmap->map,
+			    BUS_DMASYNC_POSTWRITE);
+			bus_dmamap_unload(sc->tx.buf_tag, bmap->map);
+			m_freem(bmap->mbuf);
+			bmap->mbuf = NULL;
+		}
+		awg_setup_txdesc(sc, i, 0, 0, 0);
+	}
+	sc->tx.next = i;
+	bus_dmamap_sync(sc->tx.desc_tag, sc->tx.desc_map,
+	    BUS_DMASYNC_PREREAD | BUS_DMASYNC_PREWRITE);
+
 	if_setdrvflagbits(ifp, 0, IFF_DRV_RUNNING | IFF_DRV_OACTIVE);
 }
 
@@ -841,7 +858,7 @@ awg_rxintr(struct awg_softc *sc)
 		len = (status & RX_FRM_LEN) >> RX_FRM_LEN_SHIFT;
 
 		if (len == 0) {
-			if (status & (RX_NO_ENOUGH_BUF_ERR | RX_OVERFLOW_ERR))
+			if ((status & (RX_NO_ENOUGH_BUF_ERR | RX_OVERFLOW_ERR)) != 0)
 				if_inc_counter(ifp, IFCOUNTER_IERRORS, 1);
 			awg_reuse_rxdesc(sc, index);
 			continue;
@@ -918,10 +935,10 @@ awg_txintr(struct awg_softc *sc)
 
 	AWG_ASSERT_LOCKED(sc);
 
+	ifp = sc->ifp;
 	bus_dmamap_sync(sc->tx.desc_tag, sc->tx.desc_map,
 	    BUS_DMASYNC_POSTREAD | BUS_DMASYNC_POSTWRITE);
 
-	ifp = sc->ifp;
 	for (i = sc->tx.next; sc->tx.queued > 0; i = TX_NEXT(i)) {
 		desc = &sc->tx.desc_ring[i];
 		status = le32toh(desc->status);
@@ -937,13 +954,18 @@ awg_txintr(struct awg_softc *sc)
 		}
 		awg_setup_txdesc(sc, i, 0, 0, 0);
 		if_setdrvflagbits(ifp, 0, IFF_DRV_OACTIVE);
-		if_inc_counter(ifp, IFCOUNTER_OPACKETS, 1);
+		if ((status & (TX_HEADER_ERR | TX_PAYLOAD_ERR)) != 0) {
+			if_inc_counter(ifp, IFCOUNTER_OERRORS, 1);
+		}
+		else {
+			if_inc_counter(ifp, IFCOUNTER_OPACKETS, 1);
+		}
 	}
 
 	sc->tx.next = i;
 
 	bus_dmamap_sync(sc->tx.desc_tag, sc->tx.desc_map,
-	    BUS_DMASYNC_PREWRITE);
+	    BUS_DMASYNC_PREREAD | BUS_DMASYNC_PREWRITE);
 }
 
 static void
@@ -963,9 +985,10 @@ awg_intr(void *arg)
 
 	if (val & (TX_INT|TX_BUF_UA_INT)) {
 		awg_txintr(sc);
-		if (!if_sendq_empty(sc->ifp))
-			awg_start_locked(sc);
 	}
+
+	if (!if_sendq_empty(sc->ifp))
+		awg_start_locked(sc);
 
 	AWG_UNLOCK(sc);
 }
@@ -1074,10 +1097,10 @@ awg_ioctl(if_t ifp, u_long cmd, caddr_t data)
 			if_togglecapenable(ifp, IFCAP_RXCSUM);
 		if (mask & IFCAP_TXCSUM)
 			if_togglecapenable(ifp, IFCAP_TXCSUM);
-		if ((if_getcapenable(ifp) & (IFCAP_RXCSUM|IFCAP_TXCSUM)) != 0)
-			if_sethwassistbits(ifp, CSUM_IP, 0);
+		if ((if_getcapenable(ifp) & IFCAP_TXCSUM) != 0)
+			if_sethwassistbits(ifp, CSUM_IP | CSUM_UDP | CSUM_TCP, 0);
 		else
-			if_sethwassistbits(ifp, 0, CSUM_IP);
+			if_sethwassistbits(ifp, 0, CSUM_IP | CSUM_UDP | CSUM_TCP);
 		break;
 	default:
 		error = ether_ioctl(ifp, cmd, data);
