@@ -55,7 +55,6 @@ __FBSDID("$FreeBSD: head/sys/arm/allwinner/if_awg.c 320830M $");
 #include <net/if_media.h>
 #include <net/if_types.h>
 #include <net/if_var.h>
-#include <sys/sysctl.h>
 
 #include <machine/bus.h>
 
@@ -560,8 +559,8 @@ static void
 awg_start_locked(struct awg_softc *sc)
 {
 	struct mbuf *m;
-	if_t ifp;
 	uint32_t val;
+	if_t ifp;
 	int cnt;
 
 	AWG_ASSERT_LOCKED(sc);
@@ -1643,12 +1642,12 @@ awg_setup_dma(device_t dev)
 		return (error);
 	}
 
-        error = bus_dmamap_create(sc->rx.buf_tag, 0, &sc->rx.buf_spare_map);
-        if (error != 0) {
-                device_printf(dev,
-                    "cannot create RX buffer spare map\n");
-                return (error);
-        }
+	error = bus_dmamap_create(sc->rx.buf_tag, 0, &sc->rx.buf_spare_map);
+	if (error != 0) {
+		device_printf(dev,
+		    "cannot create RX buffer spare map\n");
+		return (error);
+	}
 
 	for (i = 0; i < RX_DESC_COUNT; i++) {
 		sc->rx.desc_ring[i].next =
