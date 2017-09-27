@@ -74,8 +74,6 @@ __FBSDID("$FreeBSD: head/sys/arm/allwinner/if_awg.c 320830M $");
 #include "miibus_if.h"
 #include "gpio_if.h"
 
-#define AWG_DEBUG
-
 #define	RD4(sc, reg)		bus_read_4((sc)->res[_RES_EMAC], (reg))
 #define	WR4(sc, reg, val)	bus_write_4((sc)->res[_RES_EMAC], (reg), (val))
 
@@ -172,10 +170,6 @@ struct awg_txring {
 	bus_dma_tag_t		buf_tag;
 	struct awg_bufmap	buf_map[TX_DESC_COUNT];
 	u_int			cur, next, queued;
-	u_int			completed_ints;
-	u_int			buf_ua_ints;
-	u_int			undeflow_ints;
-	u_int			collapse_failures;
 };
 
 struct awg_rxring {
@@ -412,7 +406,6 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 	if (error == EFBIG) {
 		m = m_collapse(m, M_NOWAIT, TX_MAX_SEGS);
 		if (m == NULL) {
-			sc->tx.collapse_failures++;
 			m_freem(*mp);
 			*mp = NULL;
 			return (ENOBUFS);
@@ -489,6 +482,23 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 }
 
 static void
+awg_clean_txbuf(struct awg_softc *sc, int index)
+{
+	struct awg_bufmap *bmap;
+
+	--sc->tx.queued;
+
+	bmap = &sc->tx.buf_map[index];
+	if (bmap->mbuf != NULL) {
+		bus_dmamap_sync(sc->tx.buf_tag, bmap->map,
+		    BUS_DMASYNC_POSTWRITE);
+		bus_dmamap_unload(sc->tx.buf_tag, bmap->map);
+		m_freem(bmap->mbuf);
+		bmap->mbuf = NULL;
+	}
+}
+
+static void
 awg_setup_rxdesc(struct awg_softc *sc, int index, bus_addr_t paddr)
 {
 	uint32_t status, size;
@@ -505,7 +515,7 @@ static void
 awg_reuse_rxdesc(struct awg_softc *sc, int index)
 {
 
-	awg_setup_rxdesc(sc, index, le32toh(sc->rx.desc_ring[index].addr));
+	sc->rx.desc_ring[index].status = htole32(RX_DESC_CTL);
 }
 
 static int
@@ -586,7 +596,7 @@ awg_start_locked(struct awg_softc *sc)
 
 		/* Start and run TX DMA */
 		val = RD4(sc, EMAC_TX_CTL_1);
-		WR4(sc, EMAC_TX_CTL_1, val | TX_DMA_EN | TX_DMA_START);
+		WR4(sc, EMAC_TX_CTL_1, val | TX_DMA_START);
 	}
 }
 
@@ -704,7 +714,7 @@ static void
 awg_enable_intr(struct awg_softc *sc)
 {
 	/* Enable interrupts */
-	WR4(sc, EMAC_INT_EN, RX_INT_EN | TX_INT_EN | TX_BUF_UA_INT_EN | TX_UNDERFLOW_INT);
+	WR4(sc, EMAC_INT_EN, RX_INT_EN | TX_INT_EN | TX_BUF_UA_INT_EN);
 }
 
 static void
@@ -784,7 +794,6 @@ awg_init(void *softc)
 static void
 awg_stop(struct awg_softc *sc)
 {
-	struct awg_bufmap *bmap;
 	if_t ifp;
 	uint32_t val;
 	int i;
@@ -824,20 +833,32 @@ awg_stop(struct awg_softc *sc)
 
 	/* Release any xmit buffers. */
 	for (i = sc->tx.next; sc->tx.queued > 0; i = TX_NEXT(i)) {
-		--sc->tx.queued;
-		bmap = &sc->tx.buf_map[i];
-		if (bmap->mbuf != NULL) {
-			bus_dmamap_sync(sc->tx.buf_tag, bmap->map,
-			    BUS_DMASYNC_POSTWRITE);
-			bus_dmamap_unload(sc->tx.buf_tag, bmap->map);
-			m_freem(bmap->mbuf);
-			bmap->mbuf = NULL;
-		}
-		sc->tx.desc_ring[i].status = 0;
+		val = le32toh(sc->tx.desc_ring[i].status);
+		if ((val & TX_DESC_CTL) != 0)
+			break;
+		awg_clean_txbuf(sc, i);
 	}
-	sc->tx.next = 0;
-	sc->tx.cur = 0;
+	sc->tx.next = i;
+	for (; sc->tx.queued > 0; i = TX_NEXT(i)) {
+		sc->tx.desc_ring[i].status = 0;
+		awg_clean_txbuf(sc, i);
+	}
+	sc->tx.cur = sc->tx.next;
 	bus_dmamap_sync(sc->tx.desc_tag, sc->tx.desc_map,
+	    BUS_DMASYNC_PREREAD | BUS_DMASYNC_PREWRITE);
+
+	/* Setup RX buffers for reuse */
+	bus_dmamap_sync(sc->rx.desc_tag, sc->rx.desc_map,
+	    BUS_DMASYNC_POSTREAD | BUS_DMASYNC_POSTWRITE);
+
+	for (i = sc->rx.cur; ; i = RX_NEXT(i)) {
+		val = le32toh(sc->rx.desc_ring[i].status);
+		if ((val & RX_DESC_CTL) != 0)
+			break;
+		awg_reuse_rxdesc(sc, i);
+	}
+	sc->rx.cur = i;
+	bus_dmamap_sync(sc->rx.desc_tag, sc->rx.desc_map,
 	    BUS_DMASYNC_PREREAD | BUS_DMASYNC_PREWRITE);
 
 	if_setdrvflagbits(ifp, 0, IFF_DRV_RUNNING | IFF_DRV_OACTIVE);
@@ -936,7 +957,6 @@ awg_rxintr(struct awg_softc *sc)
 static void
 awg_txeof(struct awg_softc *sc)
 {
-	struct awg_bufmap *bmap;
 	struct emac_desc *desc;
 	uint32_t status;
 	if_t ifp;
@@ -957,16 +977,7 @@ awg_txeof(struct awg_softc *sc)
 			break;
 
 		prog++;
-		--sc->tx.queued;
-
-		bmap = &sc->tx.buf_map[i];
-		if (bmap->mbuf != NULL) {
-			bus_dmamap_sync(sc->tx.buf_tag, bmap->map,
-			    BUS_DMASYNC_POSTWRITE);
-			bus_dmamap_unload(sc->tx.buf_tag, bmap->map);
-			m_freem(bmap->mbuf);
-			bmap->mbuf = NULL;
-		}
+		awg_clean_txbuf(sc, i);
 		if ((status & (TX_HEADER_ERR | TX_PAYLOAD_ERR)) != 0) {
 			if_inc_counter(ifp, IFCOUNTER_OERRORS, 1);
 		}
@@ -996,18 +1007,8 @@ awg_intr(void *arg)
 	if (val & RX_INT)
 		awg_rxintr(sc);
 
-	if (val & TX_INT) {
-		sc->tx.completed_ints++;
+	if (val & TX_INT)
 		awg_txeof(sc);
-	}
-
-	if (val & TX_BUF_UA_INT) {
-		sc->tx.buf_ua_ints++;
-	}
-
-	if (val & TX_UNDERFLOW_INT) {
-		sc->tx.undeflow_ints++;
-	}
 
 	if (val & (TX_INT | TX_BUF_UA_INT)) {
 		if (!if_sendq_empty(sc->ifp))
@@ -1677,66 +1678,6 @@ awg_setup_dma(device_t dev)
 }
 
 static int
-awg_dump_regs_sysctl_handler(SYSCTL_HANDLER_ARGS)
-{
-	device_t dev;
-
-	dev = (device_t)arg1;
-
-	awg_dump_regs(dev);
-
-	{
-		struct awg_softc *sc;
-	        sc = device_get_softc(dev);
-
-		device_printf(dev, "  TX_DESC[%d].status %08x\n", sc->tx.next,
-		    le32toh(sc->tx.desc_ring[sc->tx.next].status));
-		device_printf(dev, "  TX_DESC[%d].size %08x\n", sc->tx.next,
-		    le32toh(sc->tx.desc_ring[sc->tx.next].size));
-	}
-
-	return 0;
-}
-
-static void
-awg_add_sysctls(device_t dev)
-{
-	struct awg_softc *sc;
-	struct sysctl_ctx_list *ctx;
-	struct sysctl_oid_list *parent, *tx_parent;
-	struct sysctl_oid *node;
-
-        sc = device_get_softc(dev);
-
-	ctx = device_get_sysctl_ctx(dev);
-	parent = SYSCTL_CHILDREN(device_get_sysctl_tree(dev));
-
-        SYSCTL_ADD_PROC(ctx, parent, OID_AUTO, "dump_regs",
-            CTLTYPE_UINT | CTLFLAG_WR, dev, 0, awg_dump_regs_sysctl_handler, "IU",
-            "Dump internal registers");
-
-	node = SYSCTL_ADD_NODE(ctx, parent, OID_AUTO, "tx",
-	    CTLFLAG_RD, NULL, "AWG TX Statistics");
-	tx_parent = SYSCTL_CHILDREN(node);
-
-	SYSCTL_ADD_UINT(ctx, tx_parent, OID_AUTO, "completed_ints",
-	    CTLFLAG_RD, &sc->tx.completed_ints, 0,
-	    "Number of tx completed interrupts triggered");
-	SYSCTL_ADD_UINT(ctx, tx_parent, OID_AUTO, "buf_ua_ints",
-	    CTLFLAG_RD, &sc->tx.buf_ua_ints, 0,
-	    "Number of tx buffer unavailable interrupts triggered");
-	SYSCTL_ADD_UINT(ctx, tx_parent, OID_AUTO, "undeflow_ints",
-	    CTLFLAG_RD, &sc->tx.undeflow_ints, 0,
-	    "Number of tx underflow interrupts triggered");
-	SYSCTL_ADD_UINT(ctx, tx_parent, OID_AUTO, "queued",
-	    CTLFLAG_RD, &sc->tx.queued, 0,
-	    "Number of tx queued buffers");
-	SYSCTL_ADD_UINT(ctx, tx_parent, OID_AUTO, "collapse_failures",
-	    CTLFLAG_RD, &sc->tx.collapse_failures, 0,
-	    "Number of tx m_collapse failures");
-}
-
-static int
 awg_probe(device_t dev)
 {
 	if (!ofw_bus_status_okay(dev))
@@ -1824,8 +1765,6 @@ awg_attach(device_t dev)
 
 	/* Attach ethernet interface */
 	ether_ifattach(sc->ifp, eaddr);
-
-	awg_add_sysctls(dev);
 
 	return (0);
 }

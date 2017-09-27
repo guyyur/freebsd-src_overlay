@@ -81,6 +81,7 @@ my_list="
   share/man/man5/rc.conf.5
   share/termcap/termcap
   sys/arm/allwinner/if_awg.c
+  sys/arm/allwinner/if_awgreg.h
   sys/kern/subr_rtc.c
   sys/net/rtsock.c
   sys/netinet6/in6.c
