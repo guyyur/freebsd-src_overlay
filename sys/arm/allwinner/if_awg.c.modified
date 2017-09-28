@@ -407,7 +407,7 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 		if (m == NULL) {
 			m_freem(*mp);
 			*mp = NULL;
-			return (ENOBUFS);
+			return (ENOMEM);
 		}
 		*mp = m;
 		error = bus_dmamap_load_mbuf_sg(sc->tx.buf_tag, map, m,
@@ -415,7 +415,7 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 		if (error != 0) {
 			m_freem(*mp);
 			*mp = NULL;
-			return (ENOBUFS);
+			return (ENOMEM);
 		}
 	} else if (error != 0)
 		return (error);
@@ -561,7 +561,7 @@ awg_start_locked(struct awg_softc *sc)
 	struct mbuf *m;
 	uint32_t val;
 	if_t ifp;
-	int cnt;
+	int cnt, err;
 
 	AWG_ASSERT_LOCKED(sc);
 
@@ -579,12 +579,15 @@ awg_start_locked(struct awg_softc *sc)
 		if (m == NULL)
 			break;
 
-		if (awg_encap(sc, &m) != 0) {
-			if (m == NULL)
+		err = awg_encap(sc, &m);
+		if (err != 0) {
+			if (m != NULL)
+				if_sendq_prepend(ifp, m);
+			if (err == ENOBUFS) {
+				if_setdrvflagbits(ifp, IFF_DRV_OACTIVE, 0);
 				break;
-			if_sendq_prepend(ifp, m);
-			if_setdrvflagbits(ifp, IFF_DRV_OACTIVE, 0);
-			break;
+			}
+			continue;
 		}
 		if_bpfmtap(ifp, m);
 	}
