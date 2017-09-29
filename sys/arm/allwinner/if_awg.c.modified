@@ -972,7 +972,7 @@ static void
 awg_txeof(struct awg_softc *sc)
 {
 	struct emac_desc *desc;
-	uint32_t status;
+	uint32_t status, size;
 	if_t ifp;
 	int i, prog;
 
@@ -992,11 +992,12 @@ awg_txeof(struct awg_softc *sc)
 
 		prog++;
 		awg_clean_txbuf(sc, i);
-		if ((status & (TX_HEADER_ERR | TX_PAYLOAD_ERR)) != 0) {
-			if_inc_counter(ifp, IFCOUNTER_OERRORS, 1);
-		}
-		else {
-			if_inc_counter(ifp, IFCOUNTER_OPACKETS, 1);
+		size = le32toh(desc->size);
+		if (size & TX_LAST_DESC) {
+			if ((status & (TX_HEADER_ERR | TX_PAYLOAD_ERR)) != 0)
+				if_inc_counter(ifp, IFCOUNTER_OERRORS, 1);
+			else
+				if_inc_counter(ifp, IFCOUNTER_OPACKETS, 1);
 		}
 	}
 
