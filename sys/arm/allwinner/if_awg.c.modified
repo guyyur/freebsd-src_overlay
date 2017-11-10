@@ -23,7 +23,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * $FreeBSD: head/sys/arm/allwinner/if_awg.c 320830M $
+ * $FreeBSD: head/sys/arm/allwinner/if_awg.c 325410M $
  */
 
 /*
@@ -33,7 +33,7 @@
 #include "opt_device_polling.h"
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD: head/sys/arm/allwinner/if_awg.c 320830M $");
+__FBSDID("$FreeBSD: head/sys/arm/allwinner/if_awg.c 325410M $");
 
 #include <sys/param.h>
 #include <sys/systm.h>
@@ -92,7 +92,7 @@ __FBSDID("$FreeBSD: head/sys/arm/allwinner/if_awg.c 320830M $");
 #define	TX_SKIP(n, o)		(((n) + (o)) & (TX_DESC_COUNT - 1))
 #define	RX_NEXT(n)		(((n) + 1) & (RX_DESC_COUNT - 1))
 
-#define	TX_MAX_SEGS		10
+#define	TX_MAX_SEGS		20
 
 #define	SOFT_RST_RETRY		1000
 #define	MII_BUSY_RETRY		1000
@@ -103,8 +103,6 @@ __FBSDID("$FreeBSD: head/sys/arm/allwinner/if_awg.c 320830M $");
 #define	PAUSE_TIME_DEFAULT	0x400
 #define	TX_INTERVAL_DEFAULT	64
 #define	RX_BATCH_DEFAULT	64
-
-#define	TX_INTERVAL_NEXT(n)	(((n) + 1) & (awg_tx_interval - 1))
 
 /* syscon EMAC clock register */
 #define	EMAC_CLK_EPHY_ADDR	(0x1f << 20)	/* H3 */
@@ -171,7 +169,7 @@ struct awg_txring {
 	bus_dma_tag_t		buf_tag;
 	struct awg_bufmap	buf_map[TX_DESC_COUNT];
 	u_int			cur, next, queued;
-	u_int			pkts;
+	u_int			segs;
 };
 
 struct awg_rxring {
@@ -196,6 +194,7 @@ struct awg_softc {
 	struct resource		*res[_RES_NITEMS];
 	struct mtx		mtx;
 	if_t			ifp;
+	device_t		dev;
 	device_t		miibus;
 	struct callout		stat_ch;
 	struct task		link_task;
@@ -396,9 +395,9 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 {
 	bus_dmamap_t map;
 	bus_dma_segment_t segs[TX_MAX_SEGS];
-	int error, i, nsegs, cur, first, last;
-	uint32_t flags, status;
+	int error, nsegs, cur, first, last, i;
 	u_int csum_flags;
+	uint32_t flags, status;
 	struct mbuf *m;
 
 	cur = first = sc->tx.cur;
@@ -410,6 +409,7 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 	if (error == EFBIG) {
 		m = m_collapse(m, M_NOWAIT, TX_MAX_SEGS);
 		if (m == NULL) {
+			device_printf(sc->dev, "awg_encap: m_collapse failed\n");
 			m_freem(*mp);
 			*mp = NULL;
 			return (ENOMEM);
@@ -420,10 +420,12 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 		if (error != 0) {
 			m_freem(*mp);
 			*mp = NULL;
-			return (ENOMEM);
 		}
-	} else if (error != 0)
+	}
+	if (error != 0) {
+		device_printf(sc->dev, "awg_encap: bus_dmamap_load_mbuf_sg failed\n");
 		return (error);
+	}
 	if (nsegs == 0) {
 		m_freem(*mp);
 		*mp = NULL;
@@ -435,6 +437,8 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 		return (ENOBUFS);
 	}
 
+	bus_dmamap_sync(sc->tx.buf_tag, map, BUS_DMASYNC_PREWRITE);
+
 	flags = TX_FIR_DESC;
 	status = 0;
 	if ((m->m_pkthdr.csum_flags & CSUM_IP) != 0) {
@@ -445,29 +449,28 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 		flags |= (csum_flags << TX_CHECKSUM_CTL_SHIFT);
 	}
 
-	bus_dmamap_sync(sc->tx.buf_tag, map, BUS_DMASYNC_PREWRITE);
-
 	for (i = 0; i < nsegs; i++) {
 		if (i == nsegs - 1) {
 			flags |= TX_LAST_DESC;
 			/*
-			 * Request Tx completion interrupt for
-			 * every awg_tx_interval frames.
+			 * Can only request TX completion
+			 * interrupt on last descriptor.
 			 */
-			sc->tx.pkts = TX_INTERVAL_NEXT(sc->tx.pkts);
-			if (sc->tx.pkts == 0)
+			sc->tx.segs++;
+			if (sc->tx.segs >= awg_tx_interval) {
+				sc->tx.segs = 0;
 				flags |= TX_INT_CTL;
+			}
 		}
 
-	        sc->tx.desc_ring[cur].addr = htole32((uint32_t)segs[i].ds_addr);
-	        sc->tx.desc_ring[cur].size = htole32(flags | segs[i].ds_len);
-	        sc->tx.desc_ring[cur].status = htole32(status);
+		sc->tx.desc_ring[cur].addr = htole32((uint32_t)segs[i].ds_addr);
+		sc->tx.desc_ring[cur].size = htole32(flags | segs[i].ds_len);
+		sc->tx.desc_ring[cur].status = htole32(status);
 
 		flags &= ~TX_FIR_DESC;
-
 		/*
 		 * Setting of the valid bit in the first descriptor is
-		 * deferred until the whole chain is fully setup.
+		 * deferred until the whole chain is fully set up.
 		 */
 		status = TX_DESC_CTL;
 
@@ -475,18 +478,19 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 		cur = TX_NEXT(cur);
 	}
 
-	/*
-	 * the whole mbuf chain has been DMA mapped, fix first descriptor.
-	 */
-	sc->tx.desc_ring[first].status = htole32(TX_DESC_CTL);
-
 	sc->tx.cur = cur;
 
-	/* store mapping and mbuf in the last segment */
+	/* Store mapping and mbuf in the last segment */
 	last = TX_SKIP(cur, TX_DESC_COUNT - 1);
 	sc->tx.buf_map[first].map = sc->tx.buf_map[last].map;
 	sc->tx.buf_map[last].map = map;
 	sc->tx.buf_map[last].mbuf = m;
+
+	/*
+	 * The whole mbuf chain has been DMA mapped,
+	 * fix the first descriptor.
+	 */
+	sc->tx.desc_ring[first].status = htole32(TX_DESC_CTL);
 
 	return (0);
 }
@@ -989,9 +993,6 @@ awg_txeof(struct awg_softc *sc)
 		status = le32toh(desc->status);
 		if ((status & TX_DESC_CTL) != 0)
 			break;
-
-		prog++;
-		awg_clean_txbuf(sc, i);
 		size = le32toh(desc->size);
 		if (size & TX_LAST_DESC) {
 			if ((status & (TX_HEADER_ERR | TX_PAYLOAD_ERR)) != 0)
@@ -999,6 +1000,8 @@ awg_txeof(struct awg_softc *sc)
 			else
 				if_inc_counter(ifp, IFCOUNTER_OPACKETS, 1);
 		}
+		prog++;
+		awg_clean_txbuf(sc, i);
 	}
 
 	if (prog > 0) {
@@ -1714,6 +1717,7 @@ awg_attach(device_t dev)
 	int error;
 
 	sc = device_get_softc(dev);
+	sc->dev = dev;
 	sc->type = ofw_bus_search_compatible(dev, compat_data)->ocd_data;
 	node = ofw_bus_get_node(dev);
 
