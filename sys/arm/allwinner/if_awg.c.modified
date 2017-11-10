@@ -450,13 +450,13 @@ awg_encap(struct awg_softc *sc, struct mbuf **mp)
 	}
 
 	for (i = 0; i < nsegs; i++) {
+		sc->tx.segs++;
 		if (i == nsegs - 1) {
 			flags |= TX_LAST_DESC;
 			/*
 			 * Can only request TX completion
 			 * interrupt on last descriptor.
 			 */
-			sc->tx.segs++;
 			if (sc->tx.segs >= awg_tx_interval) {
 				sc->tx.segs = 0;
 				flags |= TX_INT_CTL;
