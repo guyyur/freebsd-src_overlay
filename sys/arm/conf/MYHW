@@ -1,16 +1,16 @@
-# based on head/sys/arm/conf/GENERIC 322478
+# based on head/sys/arm/conf/GENERIC 325096
 
 ident		MYHW
 
 cpu		CPU_CORTEXA
 options 	SMP_ON_UP
-machine 	arm armv6
+machine 	arm armv7
 makeoptions	CONF_CFLAGS="-march=armv7a"
 
 makeoptions	KERNVIRTADDR=0xc0000000
 options 	KERNVIRTADDR=0xc0000000
 
-include 	"std.armv6"
+include 	"std.armv7"
 files		"../allwinner/files.allwinner"
 files		"../allwinner/files.allwinner_up"
 files		"../allwinner/a10/files.a10"
@@ -75,7 +75,6 @@ device		sy8106a			# SY8106A Buck Regulator
 device		ti_i2c
 device		am335x_pmic		# AM335x Power Management IC (TPC65217)
 device		am335x_rtc		# RTC support (power management only)
-#device 	am335x_dmtpps		# Pulse Per Second capture driver
 
 # i2c RTCs
 
@@ -167,12 +166,14 @@ options 	FDT			# Configure using FDT/DTB data
 makeoptions	MODULES_OVERRIDE="am335x_dmtpps dtb/allwinner dtb/am335x libiconv netgraph rc4 usb/axe usb/uchcom usb/ucom usb/uether usb/umass usb/uplcom usb/uslcom"
 
 nooptions 	TCP_HHOOK		# hhook(9) framework for TCP
+nooptions 	VIMAGE			# Subsystem virtualization, e.g. VNET
 nooptions 	IPSEC			# IP (v4/v6) security
 nooptions 	UFS_GJOURNAL		# Enable gjournal-based UFS journaling
 nooptions 	QUOTA			# Enable disk quotas for UFS
 options 	NFSD			# Network Filesystem Server
 nooptions 	NFS_ROOT		# NFS usable as /, requires NFSCL
 nooptions 	CD9660			# ISO 9660 Filesystem
+nooptions 	COMPAT_43		# Compatible with BSD 4.3 [KEEP THIS!]
 
 options 	NULLFS			# NULL filesystem
 

@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $FreeBSD: head/etc/network.subr 317424 2017-04-25M $
+# $FreeBSD: head/etc/network.subr 325559M $
 #
 IFCONFIG_CMD="/sbin/ifconfig"
 : ${netif_ipexpand_max:=2048}
@@ -122,7 +122,7 @@ ifn_vnet0()
 #
 ifconfig_up()
 {
-	local _cfg _ipv6_opts ifconfig_args
+	local _cfg _ifconfig_descr _ipv6_opts ifconfig_args 
 	_cfg=1
 
 	# Make sure lo0 always comes up.
@@ -213,6 +213,11 @@ ifconfig_up()
 
 	ifalias $1 link alias
 	ifalias $1 ether alias
+
+	_ifconfig_descr=`get_if_var $1 ifconfig_IF_descr`
+	if [ -n "${_ifconfig_descr}" ]; then
+		${IFCONFIG_CMD} $1 description "${_ifconfig_descr}"
+	fi
 
 	if wpaif $1; then
 		/etc/rc.d/wpa_supplicant start $1

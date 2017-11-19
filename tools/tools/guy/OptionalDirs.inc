@@ -72,10 +72,6 @@ OPTIONAL_DIRS+= var/run/ppp
 OPTIONAL_DIRS+= etc/ppp
 .endif
 
-.if ${MK_RCMDS} == "no"
-OPTIONAL_DIRS+= var/rwho
-.endif
-
 .if ${MK_SENDMAIL} == "no"
 OPTIONAL_DIRS+= usr/share/sendmail
 OPTIONAL_DIRS+= usr/libexec/sm.bin
@@ -89,5 +85,5 @@ OPTIONAL_DIRS+= var/unbound
 
 .if ${MK_ZFS} == "no"
 OPTIONAL_DIRS+= etc/zfs
-# OPTIONAL_DIRS+= boot/zfs
+# OPTIONAL_DIRS+= boot/zfs    # keep, otherwise loader freezes when doing cdboot
 .endif
