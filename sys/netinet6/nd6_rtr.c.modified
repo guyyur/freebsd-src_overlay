@@ -1,4 +1,6 @@
 /*-
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Copyright (C) 1995, 1996, 1997, and 1998 WIDE Project.
  * All rights reserved.
  *
@@ -30,7 +32,7 @@
  */
 
 #include <sys/cdefs.h>
-__FBSDID("$FreeBSD: head/sys/netinet6/nd6_rtr.c 315458M $");
+__FBSDID("$FreeBSD: head/sys/netinet6/nd6_rtr.c 329181M $");
 
 #include "opt_inet.h"
 #include "opt_inet6.h"
@@ -72,6 +74,8 @@ __FBSDID("$FreeBSD: head/sys/netinet6/nd6_rtr.c 315458M $");
 
 static int rtpref(struct nd_defrouter *);
 static struct nd_defrouter *defrtrlist_update(struct nd_defrouter *);
+static int prelist_update(struct nd_prefixctl *, struct nd_defrouter *,
+    struct mbuf *, int);
 static struct in6_ifaddr *in6_ifadd(struct nd_prefixctl *, int);
 static struct nd_pfxrouter *pfxrtr_lookup(struct nd_prefix *,
     struct nd_defrouter *);
@@ -133,6 +137,10 @@ nd6_rs_input(struct mbuf *m, int off, int icmp6len)
 	 * no ND6_IFF_ACCEPT_RTADV.
 	 */
 	if (!V_ip6_forwarding || ND_IFINFO(ifp)->flags & ND6_IFF_ACCEPT_RTADV)
+		goto freeit;
+
+	/* RFC 6980: Nodes MUST silently ignore fragments */   
+	if(m->m_flags & M_FRAGMENTED)
 		goto freeit;
 
 	/* Sanity checks */
@@ -223,6 +231,10 @@ nd6_ra_input(struct mbuf *m, int off, int icmp6len)
 	 * ND6_IFF_ACCEPT_RTADV is on the receiving interface.
 	 */
 	if (!(ndi->flags & ND6_IFF_ACCEPT_RTADV))
+		goto freeit;
+
+	/* RFC 6980: Nodes MUST silently ignore fragments */
+	if(m->m_flags & M_FRAGMENTED)
 		goto freeit;
 
 	if (ip6->ip6_hlim != 255) {
@@ -364,7 +376,7 @@ nd6_ra_input(struct mbuf *m, int off, int icmp6len)
 			pr.ndpr_plen = pi->nd_opt_pi_prefix_len;
 			pr.ndpr_vltime = ntohl(pi->nd_opt_pi_valid_time);
 			pr.ndpr_pltime = ntohl(pi->nd_opt_pi_preferred_time);
-			(void)prelist_update(&pr, dr, m, mcast, NULL, NULL);
+			(void)prelist_update(&pr, dr, m, mcast);
 		}
 	}
 	if (dr != NULL) {
@@ -396,8 +408,11 @@ nd6_ra_input(struct mbuf *m, int off, int icmp6len)
 			int change = (ndi->linkmtu != mtu);
 
 			ndi->linkmtu = mtu;
-			if (change) /* in6_maxmtu may change */
+			if (change) {
+				/* in6_maxmtu may change */
 				in6_setmaxmtu();
+				rt_updatemtu(ifp);
+			}
 		} else {
 			nd6log((LOG_INFO, "nd6_ra_input: bogus mtu "
 			    "mtu=%lu sent from %s; "
@@ -1206,12 +1221,11 @@ nd6_prefix_del(struct nd_prefix *pr)
 	pfxlist_onlink_check();
 }
 
-int
+static int
 prelist_update(struct nd_prefixctl *new, struct nd_defrouter *dr,
-    struct mbuf *m, int mcast, struct nd_prefix **newp,
-    struct in6_ifaddr *ia6)
+    struct mbuf *m, int mcast)
 {
-	struct in6_ifaddr *ia6_match = NULL;
+	struct in6_ifaddr *ia6 = NULL, *ia6_match = NULL;
 	struct ifaddr *ifa;
 	struct ifnet *ifp = new->ndpr_ifp;
 	struct nd_prefix *pr;
@@ -1302,16 +1316,6 @@ prelist_update(struct nd_prefixctl *new, struct nd_defrouter *dr,
 		}
 	}
 
-	if (newp != NULL)
-		*newp = pr;
-
-	/* relate the address to the prefix */
-	if (ia6 && ia6->ia6_ndpr == NULL) {
-		/* note that we should use pr (not new) for reference. */
-		pr->ndpr_addrcnt++;
-		ia6->ia6_ndpr = pr;
-	}
-
 	/*
 	 * Address autoconfiguration based on Section 5.5.3 of RFC 2462.
 	 * Note that pr must be non NULL at this point.
@@ -1332,8 +1336,6 @@ prelist_update(struct nd_prefixctl *new, struct nd_defrouter *dr,
 		goto end;
 	}
 
-	/* no address provided, prefix is from RA */
-	if (ia6 == NULL) {
 	/*
 	 * 5.5.3 (d).  If the prefix advertised is not equal to the prefix of
 	 * an address configured by stateless autoconfiguration already in the
@@ -1500,19 +1502,19 @@ prelist_update(struct nd_prefixctl *new, struct nd_defrouter *dr,
 			goto end;
 		}
 
-		if ((ia6 = in6_ifadd(new, mcast)) == NULL) {
-			/* just set an error. do not bark here. */
-			error = EADDRNOTAVAIL; /* XXX: might be unused. */
-			goto end;
-		}
-
+		if ((ia6 = in6_ifadd(new, mcast)) != NULL) {
 			/*
 			 * note that we should use pr (not new) for reference.
 			 */
 			pr->ndpr_addrcnt++;
 			ia6->ia6_ndpr = pr;
-		}
-	}
+
+			/*
+			 * toggle onlink state if the address was assigned
+			 * a prefix route.
+			 */
+			if (ia6->ia_flags & IFA_ROUTE)
+				pr->ndpr_stateflags |= NDPRF_ONLINK;
 
 			/*
 			 * RFC 3041 3.3 (2).
@@ -1535,10 +1537,7 @@ prelist_update(struct nd_prefixctl *new, struct nd_defrouter *dr,
 					    e));
 				}
 			}
-
-			/* ia6 was created in this function */
-			if (ia6_match)
-				ifa_free(&ia6->ia_ifa);
+			ifa_free(&ia6->ia_ifa);
 
 			/*
 			 * A newly added address might affect the status
@@ -1546,6 +1545,11 @@ prelist_update(struct nd_prefixctl *new, struct nd_defrouter *dr,
 			 * XXX: what if address duplication happens?
 			 */
 			pfxlist_onlink_check();
+		} else {
+			/* just set an error. do not bark here. */
+			error = EADDRNOTAVAIL; /* XXX: might be unused. */
+		}
+	}
 
 end:
 	if (pr != NULL)

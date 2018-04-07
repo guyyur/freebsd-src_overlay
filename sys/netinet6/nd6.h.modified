@@ -1,4 +1,6 @@
 /*-
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Copyright (C) 1995, 1996, 1997, and 1998 WIDE Project.
  * All rights reserved.
  *
@@ -27,7 +29,7 @@
  * SUCH DAMAGE.
  *
  *	$KAME: nd6.h,v 1.76 2001/12/18 02:10:31 itojun Exp $
- * $FreeBSD: head/sys/netinet6/nd6.h 315458M $
+ * $FreeBSD: head/sys/netinet6/nd6.h 327173M $
  */
 
 #ifndef _NETINET6_ND6_H_
@@ -446,8 +448,9 @@ void nd6_cache_lladdr(struct ifnet *, struct in6_addr *,
 	char *, int, int, int);
 void nd6_grab_holdchain(struct llentry *, struct mbuf **,
     struct sockaddr_in6 *);
-int nd6_flush_holdchain(struct ifnet *, struct ifnet *, struct mbuf *,
+int nd6_flush_holdchain(struct ifnet *, struct mbuf *,
     struct sockaddr_in6 *);
+int nd6_need_cache(struct ifnet *);
 int nd6_add_ifa_lle(struct in6_ifaddr *);
 void nd6_rem_ifa_lle(struct in6_ifaddr *, int);
 int nd6_output_ifp(struct ifnet *, struct ifnet *, struct mbuf *,
@@ -476,8 +479,6 @@ void defrouter_rele(struct nd_defrouter *);
 bool defrouter_remove(struct in6_addr *, struct ifnet *);
 void defrouter_unlink(struct nd_defrouter *, struct nd_drhead *);
 void defrouter_del(struct nd_defrouter *);
-int prelist_update(struct nd_prefixctl *, struct nd_defrouter *,
-    struct mbuf *, int, struct nd_prefix **, struct in6_ifaddr *);
 int nd6_prelist_add(struct nd_prefixctl *, struct nd_defrouter *,
     struct nd_prefix **);
 void nd6_prefix_unlink(struct nd_prefix *, struct nd_prhead *);

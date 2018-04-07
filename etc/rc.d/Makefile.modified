@@ -1,4 +1,4 @@
-# $FreeBSD: head/etc/rc.d/Makefile 322552M $
+# $FreeBSD: head/etc/rc.d/Makefile 329149M $
 
 .include <src.opts.mk>
 
@@ -29,6 +29,7 @@ FILES=	DAEMON \
 	defaultroute \
 	devd \
 	devfs \
+	devmatch \
 	dhclient \
 	dmesg \
 	dumpon \

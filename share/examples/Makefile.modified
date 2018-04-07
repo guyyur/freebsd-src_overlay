@@ -1,4 +1,4 @@
-# $FreeBSD: head/share/examples/Makefile 325119M $
+# $FreeBSD: head/share/examples/Makefile 330886M $
 #
 # Doing a make install builds /usr/share/examples
 
@@ -192,7 +192,13 @@ XFILES+=	ipfw/change_rules.sh
 
 .if ${MK_JAIL} != "no"
 LDIRS+=		jails
-XFILES+=	jails/README
+XFILES+=	jails/README \
+		jails/VIMAGE \
+		jails/jail.xxx.conf \
+		jails/jib \
+		jails/jng \
+		jails/rc.conf.jails \
+		jails/rcjail.xxx.conf
 .endif
 
 .if ${MK_NIS} != "no"

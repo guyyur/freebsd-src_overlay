@@ -24,7 +24,7 @@ my_replace()
       return 1
     fi
     
-    cp -n "${my_from}" "${my_to}" 2>/dev/null
+    cp -pn "${my_from}" "${my_to}" 2>/dev/null
     
     if [ "$?" -ne 0 ]; then
       echo "error replacing" 1>&2
@@ -76,18 +76,29 @@ my_list="
   etc/rc.d/netif
   etc/rc.d/var
   etc/termcap.small
+  sbin/route/keywords
+  sbin/route/route.8
+  sbin/route/route.c
   share/examples/Makefile
   share/man/man4/ip6.4
   share/man/man5/rc.conf.5
   share/termcap/termcap
   sys/arm/allwinner/if_awg.c
-  sys/kern/subr_rtc.c
+  sys/kern/subr_clock.c
+  sys/net/route.h
   sys/net/rtsock.c
+  sys/netinet/if_ether.c
   sys/netinet6/in6.c
+  sys/netinet6/in6_ifattach.c
   sys/netinet6/nd6.c
   sys/netinet6/nd6.h
   sys/netinet6/nd6_nbr.c
   sys/netinet6/nd6_rtr.c
+  usr.bin/netstat/netstat.1
+  usr.bin/netstat/route.c
+  usr.sbin/arp/arp.4
+  usr.sbin/ppp/route.c
+  usr.sbin/route6d/route6d.c
   usr.sbin/rtadvd/control.c
   usr.sbin/rtadvd/if.c
   usr.sbin/wpa/Makefile
