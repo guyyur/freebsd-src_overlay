@@ -226,15 +226,19 @@ in6_ifaddprefix(struct in6_ifaddr *ia)
 static int
 in6_ifremprefix(struct in6_ifaddr *target)
 {
-	int error;
+	int error, flags = 0;
 	struct rm_priotracker in6_ifa_tracker;
 	struct in6_ifaddr *ia;
 
 	if ((target->ia_flags & IFA_ROUTE) == 0)
 		return 0;
 
+	if (in6_mask2len(&target->ia_prefixmask.sin6_addr, NULL) == 128 &&
+	    target->ia_dstaddr.sin6_family == AF_INET6)
+		flags |= RTF_HOST;
+
 	IN6_IFADDR_RLOCK(&in6_ifa_tracker);
-	LIST_FOREACH(ia, IN6ADDR_HASH(&target->ia_dstaddr.sin6_addr), ia6_hash) {
+	TAILQ_FOREACH(ia, &V_in6_ifaddrhead, ia_link) {
 		if (target->ia_dstaddr.sin6_len) {
 			if (ia->ia_dstaddr.sin6_len == 0 ||
 			    !IN6_ARE_ADDR_EQUAL(&ia->ia_dstaddr.sin6_addr,
@@ -254,7 +258,7 @@ in6_ifremprefix(struct in6_ifaddr *target)
 			ifa_ref(&ia->ia_ifa);
 			IN6_IFADDR_RUNLOCK(&in6_ifa_tracker);
 
-			rtinit(&target->ia_ifa, RTM_DELETE, 0);
+			rtinit(&target->ia_ifa, RTM_DELETE, flags);
 			target->ia_flags &= ~IFA_ROUTE;
 
 			error = in6_ifaddprefix(ia);
@@ -269,7 +273,7 @@ in6_ifremprefix(struct in6_ifaddr *target)
 	/*
 	 * noone seem to have prefix route.  remove it.
 	 */
-	rtinit(&target->ia_ifa, RTM_DELETE, 0);
+	rtinit(&target->ia_ifa, RTM_DELETE, flags);
 	target->ia_flags &= ~IFA_ROUTE;
 	return 0;
 }
@@ -645,6 +649,14 @@ in6_control(struct socket *so, u_long cmd, caddr_t data,
 			if (ia->ia_ifa.ifa_carp)
 				(*carp_detach_p)(&ia->ia_ifa, true);
 			ifa_free(&ia->ia_ifa);
+		}
+		if ((ia = in6ifa_ifpwithaddr(ifp, &ifra->ifra_addr.sin6_addr))
+		    == NULL) {
+			/*
+			 * this can happen when the user specify the 0 valid
+			 * lifetime.
+			 */
+			break;
 		}
 
 		if (cmd == ocmd && ifra->ifra_vhid > 0) {
