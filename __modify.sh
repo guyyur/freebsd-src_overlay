@@ -70,12 +70,13 @@ my_restore()
 my_list="
   bin/Makefile
   contrib/mtree/compare.c
-  etc/defaults/rc.conf
-  etc/network.subr
-  etc/rc.d/Makefile
-  etc/rc.d/netif
-  etc/rc.d/var
   etc/termcap.small
+  lib/lib80211/regdomain.xml
+  libexec/rc/network.subr
+  libexec/rc/rc.conf
+  libexec/rc/rc.d/Makefile
+  libexec/rc/rc.d/netif
+  libexec/rc/rc.d/var
   sbin/route/keywords
   sbin/route/route.8
   sbin/route/route.c
@@ -84,7 +85,7 @@ my_list="
   share/man/man5/rc.conf.5
   share/termcap/termcap
   sys/arm/allwinner/if_awg.c
-  sys/kern/subr_clock.c
+  sys/kern/subr_rtc.c
   sys/net/route.h
   sys/net/rtsock.c
   sys/netinet/if_ether.c

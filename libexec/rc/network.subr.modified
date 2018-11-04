@@ -22,7 +22,7 @@
 # OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 #
-# $FreeBSD: head/etc/network.subr 326001M $
+# $FreeBSD: head/libexec/rc/network.subr 339462M $
 #
 IFCONFIG_CMD="/sbin/ifconfig"
 : ${netif_ipexpand_max:=2048}
@@ -1412,7 +1412,7 @@ clone_up()
 			_list="$_list $ifn"
 		fi
 		tmpargs=$(get_if_var $ifn gifconfig_IF)
-		eval ifconfig_${ifn}=\"tunnel \$tmpargs\"
+		eval ifconfig_${ifn}=\"\$ifconfig_${ifn} tunnel \$tmpargs\"
 	done
 	if [ -n "${_list# }" ]; then
 		echo "Created clone interfaces: ${_list# }."

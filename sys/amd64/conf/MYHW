@@ -1,4 +1,4 @@
-# based on: head/sys/amd64/conf/GENERIC 331766
+# based on: head/sys/amd64/conf/GENERIC 339338
 
 cpu		HAMMER
 ident		MYHW
@@ -25,8 +25,8 @@ options 	NFSLOCKD		# Network Lock Manager
 options 	MSDOSFS			# MSDOS Filesystem
 options 	PROCFS			# Process filesystem (requires PSEUDOFS)
 options 	PSEUDOFS		# Pseudo-filesystem framework
-options 	GEOM_PART_GPT		# GUID Partition Tables.
 options 	GEOM_LABEL		# Provides labelization
+options 	EFIRT			# EFI Runtime Services support
 # options 	COMPAT_FREEBSD32	# Compatible with i386 binaries
 options 	COMPAT_FREEBSD10	# Compatible with FreeBSD10
 options 	COMPAT_FREEBSD11	# Compatible with FreeBSD11
@@ -65,6 +65,12 @@ options 	INVARIANT_SUPPORT	# Extra sanity checks of internal structures, require
 options 	WITNESS			# Enable checks to detect deadlocks and cycles
 options 	WITNESS_SKIPSPIN	# Don't run witness on spinlocks for speed
 options 	MALLOC_DEBUG_MAXZONES=8	# Separate malloc(9) zones
+
+# Kernel dump features.
+# options 	EKCD			# Support for encrypted kernel dumps
+options 	GZIO			# gzip-compressed kernel and user dumps
+options 	ZSTDIO			# zstd-compressed kernel and user dumps
+# options 	NETDUMP			# netdump(4) client support
 
 # Make an SMP-capable kernel by default
 options 	SMP			# Symmetric MultiProcessor Kernel
@@ -156,7 +162,7 @@ device		snd_ich			# Intel, NVidia and other ICH AC'97 Audio
 # device		sdhci			# Generic PCI SD Host Controller
 
 #
-makeoptions	MODULES_OVERRIDE="cd9660 cd9660_iconv cpuctl drm/drm drm/sis drm2/drm2 drm2/i915kms drm2/radeonkms drm2/radeonkmsfw dtrace em ext2fs fdescfs fuse geom/geom_nop hwpmc i2c/if_ic i2c/iic i2c/iicbb i2c/iicbus imgact_binmisc krpc ksyms libiconv libmchain mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
+makeoptions	MODULES_OVERRIDE="cd9660 cd9660_iconv cpuctl dtrace em ext2fs fdescfs fuse geom/geom_nop hwpmc i2c/if_ic i2c/iic i2c/iicbb i2c/iicbus imgact_binmisc krpc ksyms libiconv libmchain mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
 
 options 	NULLFS			# NULL filesystem
 options 	TMPFS			# TMP filesystem

@@ -28,9 +28,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" $FreeBSD: head/share/man/man4/ip6.4 314722M $
+.\" $FreeBSD: head/share/man/man4/ip6.4 338060M $
 .\"
-.Dd March 13, 2011
+.Dd August 19, 2018
 .Dt IP6 4
 .Os
 .Sh NAME
@@ -639,6 +639,7 @@ An ancillary data object was improperly formed.
 .Xr send 2 ,
 .Xr setsockopt 2 ,
 .Xr socket 2 ,
+.Xr CMSG_DATA 3 ,
 .\" .Xr inet6_opt_init 3 ,
 .\" .Xr inet6_rth_space 3 ,
 .Xr if_nametoindex 3 ,

@@ -1,4 +1,4 @@
-# based on: head/sys/amd64/conf/GENERIC 331766
+# based on: head/sys/amd64/conf/GENERIC 339338
 
 cpu		HAMMER
 ident		MYVIRTHW
@@ -26,8 +26,8 @@ options 	MSDOSFS			# MSDOS Filesystem
 options 	CD9660			# ISO 9660 Filesystem
 options 	PROCFS			# Process filesystem (requires PSEUDOFS)
 options 	PSEUDOFS		# Pseudo-filesystem framework
-options 	GEOM_PART_GPT		# GUID Partition Tables.
 options 	GEOM_LABEL		# Provides labelization
+options 	EFIRT			# EFI Runtime Services support
 # options 	COMPAT_FREEBSD32	# Compatible with i386 binaries
 options 	COMPAT_FREEBSD10	# Compatible with FreeBSD10
 options 	COMPAT_FREEBSD11	# Compatible with FreeBSD11
@@ -67,6 +67,12 @@ options 	INVARIANT_SUPPORT	# Extra sanity checks of internal structures, require
 options 	WITNESS			# Enable checks to detect deadlocks and cycles
 options 	WITNESS_SKIPSPIN	# Don't run witness on spinlocks for speed
 options 	MALLOC_DEBUG_MAXZONES=8	# Separate malloc(9) zones
+
+# Kernel dump features.
+# options 	EKCD			# Support for encrypted kernel dumps
+options 	GZIO			# gzip-compressed kernel and user dumps
+options 	ZSTDIO			# zstd-compressed kernel and user dumps
+# options 	NETDUMP			# netdump(4) client support
 
 # Make an SMP-capable kernel by default
 options 	SMP			# Symmetric MultiProcessor Kernel
@@ -152,7 +158,7 @@ device		virtio_balloon		# VirtIO Memory Balloon device
 # device		vmx			# VMware VMXNET3 Ethernet
 
 #
-makeoptions	MODULES_OVERRIDE="agp cpuctl drm2/drm2 dtrace ext2fs fdescfs firmware fuse geom/geom_nop hwpmc i2c/iicbus imgact_binmisc krpc ksyms libmchain mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/uhid usb/ukbd usb/umass usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
+makeoptions	MODULES_OVERRIDE="agp cpuctl dtrace ext2fs fdescfs firmware fuse geom/geom_nop hwpmc i2c/iicbus imgact_binmisc krpc ksyms libmchain mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/uhid usb/ukbd usb/umass usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
 
 options 	HZ=100
 

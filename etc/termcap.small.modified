@@ -275,7 +275,7 @@ xterm|X11 terminal emulator:\
 	:te=\E[?1049l:ti=\E[?1049h:\
 	:tc=xterm-new:
 #
-# Add the capability to "clear the screen" after exiting vi, more/less, etc.
+# Entry without the capability to "clear the screen" after exiting vi, more/less, etc.
 xterm1:\
 	:tc=xterm-new:
 #

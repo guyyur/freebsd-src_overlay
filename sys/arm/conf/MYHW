@@ -1,4 +1,4 @@
-# based on head/sys/arm/conf/GENERIC 331499
+# based on head/sys/arm/conf/GENERIC 339422
 
 ident		MYHW
 
@@ -28,6 +28,7 @@ options 	EXT_RESOURCES
 device		clk
 device		phy
 device		hwreset
+device		nvmem
 device		regulator
 device		syscon
 
@@ -35,7 +36,6 @@ device		syscon
 device		cpufreq
 
 # Interrupt controller
-options 	INTRNG
 device		gic
 
 # PMU support (for CCNT).
@@ -158,7 +158,7 @@ options 	EFI
 
 # Flattened Device Tree
 options 	FDT			# Configure using FDT/DTB data
-makeoptions	MODULES_EXTRA="dtb/allwinner dtb/am335x dtb/overlays"
+makeoptions	MODULES_EXTRA="dtb/allwinner dtb/am335x"
 
 #
 makeoptions	MODULES_OVERRIDE="am335x_dmtpps dtb/allwinner dtb/am335x libiconv netgraph rc4 usb/axe usb/uchcom usb/ucom usb/uether usb/umass usb/uplcom usb/uslcom"
@@ -176,5 +176,3 @@ nooptions 	COMPAT_43		# Compatible with BSD 4.3 [KEEP THIS!]
 options 	NULLFS			# NULL filesystem
 
 options 	TEKEN_UTF8		# UTF-8 output handling
-
-device		md			# Memory "disks"

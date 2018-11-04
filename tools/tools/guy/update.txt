@@ -40,7 +40,17 @@ update pmbr + gptboot
   gpart commit $disk
 
 
-update EFI boot1
+update EFI aarch64
   mount -u -orw,noatime /boot/ESP
-  install -c /boot/boot1.efi /boot/ESP/EFI/BOOT/BOOTX64.EFI
+  install -c /boot/loader.efi /boot/ESP/EFI/BOOT/BOOTAA64.EFI
+  mount -u -oro,noatime /boot/ESP
+
+update EFI amd64
+  mount -u -orw,noatime /boot/ESP
+  install -c /boot/loader.efi /boot/ESP/EFI/BOOT/BOOTX64.EFI
+  mount -u -oro,noatime /boot/ESP
+
+update EFI armv7
+  mount -u -orw,noatime /boot/ESP
+  install -c /boot/loader.efi /boot/ESP/EFI/BOOT/BOOTARM.EFI
   mount -u -oro,noatime /boot/ESP
