@@ -76,6 +76,7 @@ my_list="
   libexec/rc/rc.d/Makefile
   libexec/rc/rc.d/netif
   libexec/rc/rc.d/var
+  release/picobsd/tinyware/login/pathnames.h
   sbin/route/keywords
   sbin/route/route.8
   sbin/route/route.c
@@ -95,6 +96,8 @@ my_list="
   sys/netinet6/nd6.h
   sys/netinet6/nd6_nbr.c
   sys/netinet6/nd6_rtr.c
+  usr.bin/login/login.conf
+  usr.bin/login/pathnames.h
   usr.bin/netstat/netstat.1
   usr.bin/netstat/route.c
   usr.sbin/arp/arp.4
