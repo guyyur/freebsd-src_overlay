@@ -1,4 +1,4 @@
-# based on: head/sys/arm64/conf/GENERIC 338272
+# based on: head/sys/arm64/conf/GENERIC 346428
 
 cpu		ARM64
 ident		MYHW
@@ -10,8 +10,8 @@ options 	SCHED_ULE		# ULE scheduler
 options 	PREEMPTION		# Enable kernel thread preemption
 options 	INET			# InterNETworking
 options 	INET6			# IPv6 communications protocols
-options 	TCP_OFFLOAD		# TCP offload
 # options 	TCP_HHOOK		# hhook(9) framework for TCP
+options 	TCP_OFFLOAD		# TCP offload
 options		TCP_RFC7413		# TCP Fast Open
 options 	SCTP			# Stream Control Transmission Protocol
 options 	FFS			# Berkeley Fast Filesystem
@@ -53,7 +53,7 @@ options 	KDB			# Enable kernel debugger support.
 options 	KDB_TRACE		# Print a stack trace for a panic.
 # For full debugger support use (turn off in stable branch):
 options 	DDB			# Support DDB.
-#options 	GDB			# Support remote GDB.
+options 	GDB			# Support remote GDB.
 options 	DEADLKRES		# Enable the deadlock resolver
 options 	INVARIANTS		# Enable calls of extra sanity checking
 options 	INVARIANT_SUPPORT	# Extra sanity checks of internal structures, required by INVARIANTS
@@ -62,6 +62,13 @@ options 	WITNESS_SKIPSPIN	# Don't run witness on spinlocks for speed
 options 	MALLOC_DEBUG_MAXZONES=8	# Separate malloc(9) zones
 options 	ALT_BREAK_TO_DEBUGGER	# Enter debugger on keyboard escape sequence
 options 	USB_DEBUG		# enable debug msgs
+options 	VERBOSE_SYSINIT=0	# Support debug.verbose_sysinit, off by default
+
+# Kernel Sanitizers
+#options 	COVERAGE		# Generic kernel coverage. Used by KCOV
+#options 	KCOV			# Kernel Coverage Sanitizer
+# Warning: KUBSAN can result in a kernel too large for loader to load
+#options 	KUBSAN			# Kernel Undefined Behavior Sanitizer
 
 # Kernel dump features.
 # options 	EKCD			# Support for encrypted kernel dumps
@@ -112,7 +119,7 @@ device		usb			# USB Bus (required)
 device		ukbd			# Keyboard
 device		umass			# Disks/Mass storage - Requires scbus and da
 
-# GPIO
+# GPIO / PINCTRL
 device		aw_gpio		# Allwinner GPIO controller
 device		gpio
 device		gpioled
@@ -123,6 +130,7 @@ device		aw_rsb		# Allwinner Reduced Serial Bus
 device		iicbus
 device		iic
 device		twsi		# Allwinner I2C controller
+device		sy8106a		# SY8106A Buck Regulator
 
 # Clock and reset controllers
 device		aw_ccu		# Allwinner clock controller
@@ -148,11 +156,21 @@ device		aw_thermal	# Allwinner Thermal Sensor Controller
 # SPI
 device		spibus
 
+# PWM
+device		pwm
+device		aw_pwm
+
 # Console
 # device		vt
 # device		kbdmux
 
 # device		vt_efifb
+
+# EVDEV support
+# device		evdev			# input event device support
+# options		EVDEV_SUPPORT		# evdev support in legacy drivers
+# device		uinput			# install /dev/uinput cdev
+# device		aw_cir
 
 # Pseudo devices.
 device		crypto		# core crypto support

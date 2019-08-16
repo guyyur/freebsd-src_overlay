@@ -30,7 +30,7 @@
 # SUCH DAMAGE.
 #
 #	@(#)termcap.src	5.88 (Berkeley) 4/30/91
-# $FreeBSD: head/etc/termcap.small 218477M $
+# $FreeBSD: head/share/termcap/termcap.small 348106M $
 #
 # for syscons
 # common entry without semigraphics

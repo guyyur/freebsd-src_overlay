@@ -1,4 +1,4 @@
-# based on: head/sys/amd64/conf/GENERIC 339338
+# based on: head/sys/amd64/conf/GENERIC 343949
 
 cpu		HAMMER
 ident		MYHW
@@ -59,12 +59,20 @@ options 	KDB_TRACE		# Print a stack trace for a panic.
 options 	BUF_TRACKING		# Track buffer history
 options 	DDB			# Support DDB.
 options 	FULL_BUF_TRACKING	# Track more buffer history
+options 	GDB			# Support remote GDB.
 options 	DEADLKRES		# Enable the deadlock resolver
 options 	INVARIANTS		# Enable calls of extra sanity checking
 options 	INVARIANT_SUPPORT	# Extra sanity checks of internal structures, required by INVARIANTS
 options 	WITNESS			# Enable checks to detect deadlocks and cycles
 options 	WITNESS_SKIPSPIN	# Don't run witness on spinlocks for speed
 options 	MALLOC_DEBUG_MAXZONES=8	# Separate malloc(9) zones
+options 	VERBOSE_SYSINIT=0	# Support debug.verbose_sysinit, off by default
+
+# Kernel Sanitizers
+#options 	COVERAGE		# Generic kernel coverage. Used by KCOV
+#options 	KCOV			# Kernel Coverage Sanitizer
+# Warning: KUBSAN can result in a kernel too large for loader to load
+#options 	KUBSAN			# Kernel Undefined Behavior Sanitizer
 
 # Kernel dump features.
 # options 	EKCD			# Support for encrypted kernel dumps
@@ -161,13 +169,21 @@ device		snd_ich			# Intel, NVidia and other ICH AC'97 Audio
 # device		mmcsd			# MMC/SD memory card
 # device		sdhci			# Generic PCI SD Host Controller
 
+# evdev interface
+options 	EVDEV_SUPPORT		# evdev support in legacy drivers
+device		evdev			# input event device support
+device		uinput			# install /dev/uinput cdev
+
 #
-makeoptions	MODULES_OVERRIDE="cd9660 cd9660_iconv cpuctl dtrace em ext2fs fdescfs fuse geom/geom_nop hwpmc i2c/if_ic i2c/iic i2c/iicbb i2c/iicbus imgact_binmisc krpc ksyms libiconv libmchain mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
+makeoptions	MODULES_OVERRIDE="cd9660 cd9660_iconv cpuctl dtrace em ext2fs fdescfs fusefs geom/geom_nop hwpmc i2c/if_ic i2c/iic i2c/iicbb i2c/iicbus iflib imgact_binmisc krpc ksyms libiconv libmchain linuxkpi mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
 
 options 	NULLFS			# NULL filesystem
 options 	TMPFS			# TMP filesystem
 
 options 	TEKEN_UTF8		# UTF-8 output handling
+
+nooptions 	GEOM_PART_EBR
+nooptions 	GEOM_PART_EBR_COMPAT
 
 # device	nvram			# Access to rtc cmos via /dev/nvram
 

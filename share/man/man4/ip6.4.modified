@@ -28,9 +28,9 @@
 .\" OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 .\" SUCH DAMAGE.
 .\"
-.\" $FreeBSD: head/share/man/man4/ip6.4 338060M $
+.\" $FreeBSD: head/share/man/man4/ip6.4 339985M $
 .\"
-.Dd August 19, 2018
+.Dd November 1, 2018
 .Dt IP6 4
 .Os
 .Sh NAME
@@ -640,9 +640,8 @@ An ancillary data object was improperly formed.
 .Xr setsockopt 2 ,
 .Xr socket 2 ,
 .Xr CMSG_DATA 3 ,
-.\" .Xr inet6_opt_init 3 ,
-.\" .Xr inet6_rth_space 3 ,
 .Xr if_nametoindex 3 ,
+.Xr inet6_opt_init 3 ,
 .Xr bpf 4 ,
 .Xr icmp6 4 ,
 .Xr inet6 4 ,
@@ -678,6 +677,14 @@ An ancillary data object was improperly formed.
 .%D May 2003
 .%R RFC 3542
 .%T Advanced Sockets Application Program Interface (API) for IPv6
+.Re
+.Pp
+.Rs
+.%A S. Deering
+.%A R. Hinden
+.%T Internet Protocol, Version 6 (IPv6) Specification
+.%R RFC 8200
+.%D July 2017
 .Re
 .Pp
 The

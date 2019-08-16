@@ -1,4 +1,4 @@
-# based on head/sys/arm/conf/GENERIC 339422
+# based on head/sys/arm/conf/GENERIC 346305
 
 ident		MYHW
 
@@ -100,6 +100,7 @@ device		ti_adc
 # reboot automatically because the boot loader might have enabled the
 # watchdog.
 device		ti_wdt
+device		aw_wdog			# Allwinner Watchdog
 
 device		scbus			# SCSI bus (required for ATA/SCSI)
 device		da			# Direct Access (disks)
@@ -153,8 +154,21 @@ device		ti_pruss
 # Mailbox support
 device		ti_mbox
 
+# DMA controller
+device		a10_dmac
+device		a31_dmac
+
 # Extensible Firmware Interface
 options 	EFI
+
+# RTC
+device		aw_rtc			# Allwinner On-chip RTC
+
+# EFUSE
+device		aw_sid		# Allwinner Secure ID EFUSE
+
+# Thermal sensors
+device		aw_thermal	# Allwinner Thermal Sensor Controller
 
 # Flattened Device Tree
 options 	FDT			# Configure using FDT/DTB data
@@ -172,6 +186,8 @@ options 	NFSD			# Network Filesystem Server
 nooptions 	NFS_ROOT		# NFS usable as /, requires NFSCL
 nooptions 	CD9660			# ISO 9660 Filesystem
 nooptions 	COMPAT_43		# Compatible with BSD 4.3 [KEEP THIS!]
+
+options 	GDB			# Support remote GDB.
 
 options 	NULLFS			# NULL filesystem
 

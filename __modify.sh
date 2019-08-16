@@ -70,7 +70,6 @@ my_restore()
 my_list="
   bin/Makefile
   contrib/mtree/compare.c
-  etc/termcap.small
   lib/lib80211/regdomain.xml
   libexec/rc/network.subr
   libexec/rc/rc.conf
@@ -84,6 +83,7 @@ my_list="
   share/man/man4/ip6.4
   share/man/man5/rc.conf.5
   share/termcap/termcap
+  share/termcap/termcap.small
   sys/arm/allwinner/if_awg.c
   sys/kern/subr_rtc.c
   sys/net/route.h
@@ -101,7 +101,6 @@ my_list="
   usr.sbin/ppp/route.c
   usr.sbin/route6d/route6d.c
   usr.sbin/rtadvd/control.c
-  usr.sbin/rtadvd/if.c
   usr.sbin/wpa/Makefile
   "
 

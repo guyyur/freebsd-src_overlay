@@ -30,7 +30,7 @@
 # SUCH DAMAGE.
 #
 #	@(#)termcap.src	8.2 (Berkeley) 11/17/93
-# $FreeBSD: head/share/termcap/termcap 331006M $
+# $FreeBSD: head/share/termcap/termcap 344043M $
 
 #	Termcap source file
 #	John Kunze, Berkeley
@@ -194,6 +194,16 @@ screen|VT 100/ANSI X3.64 virtual terminal:\
 screen-256color|VT 100/ANSI X3.64 terminal with 256 colors:\
 	:Co#256:pa#32767:\
 	:AB=\E[48;5;%dm:AF=\E[38;5;%dm:tc=screen:
+
+ecma+italics|ECMA-48 italics:\
+	:ZH=\E[3m:ZR=\E[23m:
+
+tmux|tmux terminal multiplexer:\
+	:so=\E[7m:se=\E[27m:\
+	:tc=ecma+italics:tc=screen:
+tmux-256color|tmux with 256 colors:\
+	:so=\E[7m:se=\E[27m:\
+	:tc=ecma+italics:tc=screen-256color:
 
 rxvt-unicode|rxvt-unicode terminal (X Window System):\
 	:am:bw:eo:hs:km:mi:ms:xn:xo:\

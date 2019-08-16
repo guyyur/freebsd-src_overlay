@@ -203,7 +203,7 @@ package()
   fi
   
   revision="$(awk -F= '/^REVISION/ { gsub("\"",""); print $2 }' sys/conf/newvers.sh)"
-  branch="$(awk -F= '/^BRANCH/ { gsub("\"",""); print $2 }' sys/conf/newvers.sh)"
+  branch="$(awk -F= '/^BRANCH/ { sub("\\${BRANCH_OVERRIDE:-",""); sub("}",""); print $2 }' sys/conf/newvers.sh)"
   svn_revision="$(svn info | awk '/^Revision:/ { print $2 }')"
   timestamp=$(date +%Y%m%d)
   workdir="/usr/wrkdir/src-dist"
