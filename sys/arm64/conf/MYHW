@@ -1,4 +1,4 @@
-# based on: head/sys/arm64/conf/GENERIC 346428
+# based on: head/sys/arm64/conf/GENERIC 350440
 
 cpu		ARM64
 ident		MYHW
@@ -119,6 +119,13 @@ device		usb			# USB Bus (required)
 device		ukbd			# Keyboard
 device		umass			# Disks/Mass storage - Requires scbus and da
 
+# Sound support
+# device sound
+# device a10_codec
+
+# DMA controller
+device		a31_dmac
+
 # GPIO / PINCTRL
 device		aw_gpio		# Allwinner GPIO controller
 device		gpio
@@ -175,10 +182,9 @@ device		aw_pwm
 # Pseudo devices.
 device		crypto		# core crypto support
 device		loop		# Network loopback
-device		random		# Entropy device
 device		ether		# Ethernet support
 device		vlan		# 802.1Q VLAN support
-device		tun		# Packet tunnel.
+device		tuntap		# Packet tunnel.
 device		md		# Memory "disks"
 device		firmware	# firmware assist module
 options 	EFIRT		# EFI Runtime Services
@@ -202,10 +208,20 @@ options 	FDT
 device		acpi
 
 # DTBs
-makeoptions	MODULES_EXTRA="dtb/allwinner"
+makeoptions	MODULES_EXTRA+="dtb/allwinner"
 
 #
-makeoptions	MODULES_OVERRIDE="dtb/allwinner libiconv netgraph rc4 usb/axe usb/uchcom usb/ucom usb/uether usb/umass usb/uplcom usb/uslcom"
+makeoptions	MODULES_OVERRIDE+="dtb/allwinner"
+makeoptions	MODULES_OVERRIDE+="libiconv"
+makeoptions	MODULES_OVERRIDE+="netgraph"
+makeoptions	MODULES_OVERRIDE+="rc4"
+makeoptions	MODULES_OVERRIDE+="usb/axe"
+makeoptions	MODULES_OVERRIDE+="usb/uchcom"
+makeoptions	MODULES_OVERRIDE+="usb/ucom"
+makeoptions	MODULES_OVERRIDE+="usb/uether"
+makeoptions	MODULES_OVERRIDE+="usb/umass"
+makeoptions	MODULES_OVERRIDE+="usb/uplcom"
+makeoptions	MODULES_OVERRIDE+="usb/uslcom"
 
 options 	NULLFS			# NULL filesystem
 options 	TMPFS			# TMP filesystem

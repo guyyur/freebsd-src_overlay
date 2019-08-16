@@ -1,4 +1,4 @@
-# based on head/sys/arm/conf/GENERIC 346305
+# based on head/sys/arm/conf/GENERIC 350001
 
 ident		MYHW
 
@@ -59,7 +59,6 @@ device		uart_snps
 device		pty
 device		snp
 device		md			# Memory "disks"
-device		random			# Entropy device
 
 # I2C support
 device		iicbus
@@ -94,6 +93,9 @@ device		ti_spi
 
 # ADC support
 device		ti_adc
+
+# PWM
+device		pwm
 
 # Watchdog support
 # If we don't enable the watchdog driver, the BeagleBone could potentially
@@ -172,10 +174,33 @@ device		aw_thermal	# Allwinner Thermal Sensor Controller
 
 # Flattened Device Tree
 options 	FDT			# Configure using FDT/DTB data
-makeoptions	MODULES_EXTRA="dtb/allwinner dtb/am335x"
+makeoptions	MODULES_EXTRA+="dtb/allwinner"
+makeoptions	MODULES_EXTRA+="dtb/am335x"
+
+# SOC-specific modules
+# makeoptions	MODULES_EXTRA+="allwinner"
+# makeoptions	MODULES_EXTRA+="arm_ti"
+
 
 #
-makeoptions	MODULES_OVERRIDE="am335x_dmtpps dtb/allwinner dtb/am335x libiconv netgraph rc4 usb/axe usb/uchcom usb/ucom usb/uether usb/umass usb/uplcom usb/uslcom"
+makeoptions	MODULES_OVERRIDE+="allwinner/aw_pwm"
+makeoptions	MODULES_OVERRIDE+="allwinner/aw_rsb"
+makeoptions	MODULES_OVERRIDE+="allwinner/aw_spi"
+makeoptions	MODULES_OVERRIDE+="am335x_dmtpps"
+makeoptions	MODULES_OVERRIDE+="arm_ti/am335x_ehrpwm"
+makeoptions	MODULES_OVERRIDE+="dtb/allwinner"
+makeoptions	MODULES_OVERRIDE+="dtb/am335x"
+makeoptions	MODULES_OVERRIDE+="libiconv"
+makeoptions	MODULES_OVERRIDE+="netgraph"
+makeoptions	MODULES_OVERRIDE+="rc4"
+makeoptions	MODULES_OVERRIDE+="usb/axe"
+makeoptions	MODULES_OVERRIDE+="usb/uchcom"
+makeoptions	MODULES_OVERRIDE+="usb/ucom"
+makeoptions	MODULES_OVERRIDE+="usb/uether"
+makeoptions	MODULES_OVERRIDE+="usb/umass"
+makeoptions	MODULES_OVERRIDE+="usb/uplcom"
+makeoptions	MODULES_OVERRIDE+="usb/uslcom"
+
 
 nooptions 	TCP_HHOOK		# hhook(9) framework for TCP
 nooptions 	VIMAGE			# Subsystem virtualization, e.g. VNET

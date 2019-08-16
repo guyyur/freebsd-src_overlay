@@ -1,4 +1,4 @@
-# based on: head/sys/amd64/conf/GENERIC 343949
+# based on: head/sys/amd64/conf/GENERIC 349253
 
 cpu		HAMMER
 ident		MYHW
@@ -28,8 +28,8 @@ options 	PSEUDOFS		# Pseudo-filesystem framework
 options 	GEOM_LABEL		# Provides labelization
 options 	EFIRT			# EFI Runtime Services support
 # options 	COMPAT_FREEBSD32	# Compatible with i386 binaries
-options 	COMPAT_FREEBSD10	# Compatible with FreeBSD10
 options 	COMPAT_FREEBSD11	# Compatible with FreeBSD11
+options 	COMPAT_FREEBSD12	# Compatible with FreeBSD12
 options 	SCSI_DELAY=5000		# Delay (in ms) before probing SCSI
 options 	KTRACE			# ktrace(1) support
 options 	STACK			# stack(9) support
@@ -137,7 +137,6 @@ device		sge			# Silicon Integrated Systems SiS190/191
 
 # Pseudo devices.
 device		loop			# Network loopback
-device		random			# Entropy device
 device		rdrand_rng		# Intel Bull Mountain RNG
 device		ether			# Ethernet support
 device		vlan			# 802.1Q VLAN support
@@ -175,7 +174,60 @@ device		evdev			# input event device support
 device		uinput			# install /dev/uinput cdev
 
 #
-makeoptions	MODULES_OVERRIDE="cd9660 cd9660_iconv cpuctl dtrace em ext2fs fdescfs fusefs geom/geom_nop hwpmc i2c/if_ic i2c/iic i2c/iicbb i2c/iicbus iflib imgact_binmisc krpc ksyms libiconv libmchain linuxkpi mqueue msdosfs_iconv netgraph nfscl nfsd nmdm nvram opensolaris rc4 smbfs snp udf udf_iconv unionfs usb/rum usb/run usb/runfw usb/uchcom usb/ucom usb/uftdi usb/ums usb/uplcom usb/uslcom vkbd wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_tkip wlan_wep wlan_xauth zlib"
+makeoptions	MODULES_OVERRIDE+="cd9660"
+makeoptions	MODULES_OVERRIDE+="cd9660_iconv"
+makeoptions	MODULES_OVERRIDE+="cpuctl"
+makeoptions	MODULES_OVERRIDE+="dtrace"
+makeoptions	MODULES_OVERRIDE+="em"
+makeoptions	MODULES_OVERRIDE+="ext2fs"
+makeoptions	MODULES_OVERRIDE+="fdescfs"
+makeoptions	MODULES_OVERRIDE+="fusefs"
+makeoptions	MODULES_OVERRIDE+="geom/geom_nop"
+makeoptions	MODULES_OVERRIDE+="hwpmc"
+makeoptions	MODULES_OVERRIDE+="i2c/if_ic"
+makeoptions	MODULES_OVERRIDE+="i2c/iic"
+makeoptions	MODULES_OVERRIDE+="i2c/iicbb"
+makeoptions	MODULES_OVERRIDE+="i2c/iicbus"
+makeoptions	MODULES_OVERRIDE+="iflib"
+makeoptions	MODULES_OVERRIDE+="imgact_binmisc"
+makeoptions	MODULES_OVERRIDE+="krpc"
+makeoptions	MODULES_OVERRIDE+="ksyms"
+makeoptions	MODULES_OVERRIDE+="libiconv"
+makeoptions	MODULES_OVERRIDE+="libmchain"
+makeoptions	MODULES_OVERRIDE+="linuxkpi"
+makeoptions	MODULES_OVERRIDE+="mqueue"
+makeoptions	MODULES_OVERRIDE+="msdosfs_iconv"
+makeoptions	MODULES_OVERRIDE+="netgraph"
+makeoptions	MODULES_OVERRIDE+="nfscl"
+makeoptions	MODULES_OVERRIDE+="nfsd"
+makeoptions	MODULES_OVERRIDE+="nmdm"
+makeoptions	MODULES_OVERRIDE+="nvram"
+makeoptions	MODULES_OVERRIDE+="opensolaris"
+makeoptions	MODULES_OVERRIDE+="rc4"
+makeoptions	MODULES_OVERRIDE+="smbfs"
+makeoptions	MODULES_OVERRIDE+="snp"
+makeoptions	MODULES_OVERRIDE+="udf"
+makeoptions	MODULES_OVERRIDE+="udf_iconv"
+makeoptions	MODULES_OVERRIDE+="unionfs"
+makeoptions	MODULES_OVERRIDE+="usb/rum"
+makeoptions	MODULES_OVERRIDE+="usb/run"
+makeoptions	MODULES_OVERRIDE+="usb/runfw"
+makeoptions	MODULES_OVERRIDE+="usb/uchcom"
+makeoptions	MODULES_OVERRIDE+="usb/ucom"
+makeoptions	MODULES_OVERRIDE+="usb/uftdi"
+makeoptions	MODULES_OVERRIDE+="usb/ums"
+makeoptions	MODULES_OVERRIDE+="usb/uplcom"
+makeoptions	MODULES_OVERRIDE+="usb/uslcom"
+makeoptions	MODULES_OVERRIDE+="vkbd"
+makeoptions	MODULES_OVERRIDE+="wlan"
+makeoptions	MODULES_OVERRIDE+="wlan_acl"
+makeoptions	MODULES_OVERRIDE+="wlan_amrr"
+makeoptions	MODULES_OVERRIDE+="wlan_ccmp"
+makeoptions	MODULES_OVERRIDE+="wlan_rssadapt"
+makeoptions	MODULES_OVERRIDE+="wlan_tkip"
+makeoptions	MODULES_OVERRIDE+="wlan_wep"
+makeoptions	MODULES_OVERRIDE+="wlan_xauth"
+makeoptions	MODULES_OVERRIDE+="zlib"
 
 options 	NULLFS			# NULL filesystem
 options 	TMPFS			# TMP filesystem

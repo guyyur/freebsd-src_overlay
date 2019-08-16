@@ -5,7 +5,7 @@ ident		MYHW-ROUTER
 
 nooptions 	NFSD			# Network Filesystem Server
 
-device		tun
+device		tuntap
 
 # Firewall
 device		pf			# Packet Filter
