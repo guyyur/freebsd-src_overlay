@@ -77,6 +77,7 @@ my_list="
   libexec/rc/rc.d/netif
   libexec/rc/rc.d/var
   release/picobsd/tinyware/login/pathnames.h
+  sbin/devd/devd.cc
   sbin/route/keywords
   sbin/route/route.8
   sbin/route/route.c
