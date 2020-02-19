@@ -76,7 +76,6 @@ my_list="
   libexec/rc/rc.d/Makefile
   libexec/rc/rc.d/netif
   libexec/rc/rc.d/var
-  release/picobsd/tinyware/login/pathnames.h
   sbin/devd/devd.cc
   sbin/route/keywords
   sbin/route/route.8
@@ -89,7 +88,6 @@ my_list="
   sys/arm/allwinner/if_awg.c
   sys/kern/subr_rtc.c
   sys/net/route.h
-  sys/net/rtsock.c
   sys/netinet/if_ether.c
   sys/netinet6/in6.c
   sys/netinet6/in6_ifattach.c
