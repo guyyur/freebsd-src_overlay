@@ -1,4 +1,4 @@
-# based on head/sys/arm/conf/GENERIC 350001
+# based on head/sys/arm/conf/GENERIC 356895
 
 ident		MYHW
 
@@ -183,6 +183,7 @@ makeoptions	MODULES_EXTRA+="dtb/am335x"
 
 
 #
+nomakeoptions	MODULES_OVERRIDE
 makeoptions	MODULES_OVERRIDE+="allwinner/aw_pwm"
 makeoptions	MODULES_OVERRIDE+="allwinner/aw_rsb"
 makeoptions	MODULES_OVERRIDE+="allwinner/aw_spi"
@@ -194,6 +195,7 @@ makeoptions	MODULES_OVERRIDE+="libiconv"
 makeoptions	MODULES_OVERRIDE+="netgraph"
 makeoptions	MODULES_OVERRIDE+="rc4"
 makeoptions	MODULES_OVERRIDE+="usb/axe"
+makeoptions	MODULES_OVERRIDE+="usb/axge"
 makeoptions	MODULES_OVERRIDE+="usb/uchcom"
 makeoptions	MODULES_OVERRIDE+="usb/ucom"
 makeoptions	MODULES_OVERRIDE+="usb/uether"

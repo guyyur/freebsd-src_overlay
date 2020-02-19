@@ -4,15 +4,13 @@ include 	MYVIRTHW
 ident		MYVIRTHW-ROUTER
 
 nomakeoptions	MODULES_OVERRIDE
-makeoptions	MODULES_OVERRIDE+="cd9660"
-makeoptions	MODULES_OVERRIDE+="cd9660_iconv"
+makeoptions	MODULES_OVERRIDE+="cd9660 cd9660_iconv"
 makeoptions	MODULES_OVERRIDE+="fdescfs"
 makeoptions	MODULES_OVERRIDE+="krpc"
 makeoptions	MODULES_OVERRIDE+="ksyms"
 makeoptions	MODULES_OVERRIDE+="libiconv"
 makeoptions	MODULES_OVERRIDE+="netgraph"
-makeoptions	MODULES_OVERRIDE+="nfscl"
-makeoptions	MODULES_OVERRIDE+="nfsd"
+makeoptions	MODULES_OVERRIDE+="nfscl nfsd"
 makeoptions	MODULES_OVERRIDE+="nvram"
 makeoptions	MODULES_OVERRIDE+="rc4"
 makeoptions	MODULES_OVERRIDE+="unionfs"

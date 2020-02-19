@@ -1,4 +1,4 @@
-# based on: head/sys/amd64/conf/GENERIC 349253
+# based on: head/sys/amd64/conf/GENERIC 355164
 
 cpu		HAMMER
 ident		MYVIRTHW
@@ -74,6 +74,7 @@ options 	VERBOSE_SYSINIT=0	# Support debug.verbose_sysinit, off by default
 #options 	KCOV			# Kernel Coverage Sanitizer
 # Warning: KUBSAN can result in a kernel too large for loader to load
 #options 	KUBSAN			# Kernel Undefined Behavior Sanitizer
+#options 	KCSAN			# Kernel Concurrency Sanitizer
 
 # Kernel dump features.
 # options 	EKCD			# Support for encrypted kernel dumps
@@ -95,7 +96,8 @@ options 	PCI_HP			# PCI-Express native HotPlug
 device		ahci			# AHCI-compatible SATA controllers
 
 # SCSI Controllers
-device		mpt			# LSI-Logic MPT-Fusion
+# device		mpt			# LSI-Logic MPT-Fusion
+# device		pvscsi			# VMware PVSCSI
 
 # ATA/SCSI peripherals
 device		scbus			# SCSI bus (required for ATA/SCSI)
@@ -169,6 +171,7 @@ device		evdev			# input event device support
 device		uinput			# install /dev/uinput cdev
 
 #
+nomakeoptions	MODULES_OVERRIDE
 makeoptions	MODULES_OVERRIDE+="agp"
 makeoptions	MODULES_OVERRIDE+="cpuctl"
 makeoptions	MODULES_OVERRIDE+="dtrace"
@@ -187,20 +190,17 @@ makeoptions	MODULES_OVERRIDE+="linuxkpi"
 makeoptions	MODULES_OVERRIDE+="mqueue"
 makeoptions	MODULES_OVERRIDE+="msdosfs_iconv"
 makeoptions	MODULES_OVERRIDE+="netgraph"
-makeoptions	MODULES_OVERRIDE+="nfscl"
-makeoptions	MODULES_OVERRIDE+="nfsd"
+makeoptions	MODULES_OVERRIDE+="nfscl nfsd"
 makeoptions	MODULES_OVERRIDE+="nmdm"
 makeoptions	MODULES_OVERRIDE+="nvram"
 makeoptions	MODULES_OVERRIDE+="opensolaris"
 makeoptions	MODULES_OVERRIDE+="rc4"
 makeoptions	MODULES_OVERRIDE+="smbfs"
 makeoptions	MODULES_OVERRIDE+="snp"
-makeoptions	MODULES_OVERRIDE+="udf"
-makeoptions	MODULES_OVERRIDE+="udf_iconv"
+makeoptions	MODULES_OVERRIDE+="udf udf_iconv"
 makeoptions	MODULES_OVERRIDE+="unionfs"
 makeoptions	MODULES_OVERRIDE+="usb/rum"
-makeoptions	MODULES_OVERRIDE+="usb/run"
-makeoptions	MODULES_OVERRIDE+="usb/runfw"
+makeoptions	MODULES_OVERRIDE+="usb/run usb/runfw"
 makeoptions	MODULES_OVERRIDE+="usb/uchcom"
 makeoptions	MODULES_OVERRIDE+="usb/ucom"
 makeoptions	MODULES_OVERRIDE+="usb/uftdi"
@@ -211,14 +211,7 @@ makeoptions	MODULES_OVERRIDE+="usb/ums"
 makeoptions	MODULES_OVERRIDE+="usb/uplcom"
 makeoptions	MODULES_OVERRIDE+="usb/uslcom"
 makeoptions	MODULES_OVERRIDE+="vkbd"
-makeoptions	MODULES_OVERRIDE+="wlan"
-makeoptions	MODULES_OVERRIDE+="wlan_acl"
-makeoptions	MODULES_OVERRIDE+="wlan_amrr"
-makeoptions	MODULES_OVERRIDE+="wlan_ccmp"
-makeoptions	MODULES_OVERRIDE+="wlan_rssadapt"
-makeoptions	MODULES_OVERRIDE+="wlan_tkip"
-makeoptions	MODULES_OVERRIDE+="wlan_wep"
-makeoptions	MODULES_OVERRIDE+="wlan_xauth"
+makeoptions	MODULES_OVERRIDE+="wlan wlan_acl wlan_amrr wlan_ccmp wlan_rssadapt wlan_xauth"
 makeoptions	MODULES_OVERRIDE+="zlib"
 
 options 	HZ=100

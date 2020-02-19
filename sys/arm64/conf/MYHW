@@ -1,4 +1,4 @@
-# based on: head/sys/arm64/conf/GENERIC 350440
+# based on: head/sys/arm64/conf/GENERIC 357762
 
 cpu		ARM64
 ident		MYHW
@@ -69,6 +69,7 @@ options 	VERBOSE_SYSINIT=0	# Support debug.verbose_sysinit, off by default
 #options 	KCOV			# Kernel Coverage Sanitizer
 # Warning: KUBSAN can result in a kernel too large for loader to load
 #options 	KUBSAN			# Kernel Undefined Behavior Sanitizer
+#options 	KCSAN			# Kernel Concurrency Sanitizer
 
 # Kernel dump features.
 # options 	EKCD			# Support for encrypted kernel dumps
@@ -78,6 +79,7 @@ options 	ZSTDIO			# zstd-compressed kernel and user dumps
 
 # SoC support
 options 	SOC_ALLWINNER_H5
+options 	SOC_ROCKCHIP_RK3328
 
 # Timer drivers
 device		a10_timer
@@ -90,6 +92,7 @@ device		mdio
 device		mii
 device		miibus		# MII bus support
 device		awg		# Allwinner EMAC Gigabit Ethernet
+device		dwc_rk		# Rockchip Designware
 
 # Block devices
 device		scbus
@@ -103,6 +106,8 @@ device		sdhci
 device		aw_mmc			# Allwinner SD/MMC controller
 device		mmc			# mmc/sd bus
 device		mmcsd			# mmc/sd flash cards
+device		rk_dwmmc
+device		rk_emmcphy
 
 # Serial (COM) ports
 device		uart		# Generic UART driver
@@ -111,10 +116,12 @@ device		uart_snps
 device		pl011
 
 # USB support
-device		aw_ehci			# Allwinner EHCI USB interface (USB 2.0)
 device		aw_usbphy		# Allwinner USB PHY
+device		rk_usb2phy		# Rockchip USB2PHY
 device		ohci			# OHCI USB interface
 device		ehci			# EHCI USB interface (USB 2.0)
+device		xhci			# XHCI USB interface (USB 3.0)
+device		rk_dwc3			# Rockchip DWC3 controller
 device		usb			# USB Bus (required)
 device		ukbd			# Keyboard
 device		umass			# Disks/Mass storage - Requires scbus and da
@@ -131,12 +138,15 @@ device		aw_gpio		# Allwinner GPIO controller
 device		gpio
 device		gpioled
 device		fdt_pinctrl
+device		rk_gpio		# RockChip GPIO Controller
+device		rk_pinctrl	# RockChip Pinmux Controller
 
 # I2C
 device		aw_rsb		# Allwinner Reduced Serial Bus
 device		iicbus
 device		iic
 device		twsi		# Allwinner I2C controller
+device		rk_i2c		# RockChip I2C controller
 device		sy8106a		# SY8106A Buck Regulator
 
 # Clock and reset controllers
@@ -153,6 +163,7 @@ device		aw_wdog		# Allwinner Watchdog
 
 # Power management controllers
 # device		axp81x		# X-Powers AXP81x PMIC
+device		rk805		# RockChip RK805 PMIC
 
 # EFUSE
 device		aw_sid		# Allwinner Secure ID EFUSE
@@ -162,10 +173,12 @@ device		aw_thermal	# Allwinner Thermal Sensor Controller
 
 # SPI
 device		spibus
+device		rk_spi		# RockChip SPI controller
 
 # PWM
 device		pwm
 device		aw_pwm
+device		rk_pwm
 
 # Console
 # device		vt
@@ -199,6 +212,9 @@ device		regulator
 device		syscon
 device		aw_syscon
 
+# IO Domains
+device		rk_iodomain
+
 # The `bpf' device enables the Berkeley Packet Filter.
 # Be aware of the administrative consequences of enabling this!
 # Note that 'bpf' is required for DHCP.
@@ -209,13 +225,17 @@ device		acpi
 
 # DTBs
 makeoptions	MODULES_EXTRA+="dtb/allwinner"
+makeoptions	MODULES_EXTRA+="dtb/rockchip"
 
 #
+nomakeoptions	MODULES_OVERRIDE
 makeoptions	MODULES_OVERRIDE+="dtb/allwinner"
+makeoptions	MODULES_OVERRIDE+="dtb/rockchip"
 makeoptions	MODULES_OVERRIDE+="libiconv"
 makeoptions	MODULES_OVERRIDE+="netgraph"
 makeoptions	MODULES_OVERRIDE+="rc4"
 makeoptions	MODULES_OVERRIDE+="usb/axe"
+makeoptions	MODULES_OVERRIDE+="usb/axge"
 makeoptions	MODULES_OVERRIDE+="usb/uchcom"
 makeoptions	MODULES_OVERRIDE+="usb/ucom"
 makeoptions	MODULES_OVERRIDE+="usb/uether"
