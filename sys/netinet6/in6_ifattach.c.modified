@@ -422,6 +422,7 @@ in6_ifattach_linklocal(struct ifnet *ifp, struct ifnet *altifp)
 {
 	struct in6_ifaddr *ia;
 	struct in6_aliasreq ifra;
+	struct epoch_tracker et;
 	int error;
 
 	/*
